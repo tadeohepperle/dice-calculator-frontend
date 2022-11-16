@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.test {
+  background: red;
+  padding: 100px;
+  color: tan;
+}
+
+.big-shadow {
+  @apply shadow-xl p-5 text-lg;
+}
+
+.thick-shadow {
+  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.25);
+}
+
+.input-shadow {
+  box-shadow: 0 0px 4px 8px rgba(156, 208, 255, 0.1);
+  outline: none;
+}
+
+.input-shadow:focus {
+  box-shadow: 0 0px 2px 4px rgba(156, 208, 255, 0.25);
+  outline: none;
+}
+
+.surface-inner-shadow {
+  box-shadow: inset -2px 4px 8px 0px rgba(0, 0, 0, 0.39);
+}
+
+.surface-inner-shadow-and-thick {
+  box-shadow: inset -2px 4px 8px 0px rgba(0, 0, 0, 0.39),
+    0 5px 5px rgba(0, 0, 0, 0.25);
+}

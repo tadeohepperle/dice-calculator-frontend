@@ -1,0 +1,29 @@
+---
+import HeadPanel from "../components/HeadPanel.astro";
+import Example from "../components/react/Example";
+import Layout from "../layouts/Layout.astro";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {} from "@fortawesome/free-solid-svg-icons";
+import ExamplesSidebar from "../components/ExamplesSidebar.astro";
+import LearnMoreHeader from "../components/LearnMoreHeader.astro";
+import DistributionCalculator from "../components/react/DistributionCalculator";
+---
+
+<Layout title="Dice Calculator">
+  <main>
+    <HeadPanel />
+    <div class="mt-5 flex">
+      <div class="">
+        <ExamplesSidebar />
+      </div>
+      <div>
+        <LearnMoreHeader />
+        <div class="mt-5">
+          <DistributionCalculator client:load />
+        </div>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style></style>

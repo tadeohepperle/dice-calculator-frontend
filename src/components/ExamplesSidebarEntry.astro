@@ -1,0 +1,40 @@
+---
+export interface Props {
+  items: [string] | [string, string] | [string, string, string];
+  subtitle: string;
+}
+const { items, subtitle } = Astro.props;
+let sidelineClassIndex = items.length - 1;
+let href = `?dices=${items.join("|")}`; // TODO
+---
+
+<a href={href} class="group">
+  <div class="flex mt-5 cursor-pointer transition-all hover:translate-x-2">
+    <div
+      class={[
+        "w-1 mr-2 bg-sky-200",
+        "w-1 mr-2 bg-gradient-to-b from-sky-200  to-rose-200",
+        "w-1 mr-2 bg-gradient-to-b from-sky-200  via-rose-200 to-orange-200",
+      ][sidelineClassIndex]}
+    >
+    </div>
+    <div class="w-full">
+      <div class="text-sky-200 font-bold text-xl">
+        {items[0]}
+      </div>
+      {
+        items.length >= 2 && (
+          <div class="text-rose-200 font-bold text-xl">{items[1]}</div>
+        )
+      }
+      {
+        items.length >= 3 && (
+          <div class="text-orange-200 font-bold text-xl">{items[2]}</div>
+        )
+      }
+      <div class="text-slate-400 w-48 text-sm group-hover:text-white">
+        {subtitle}
+      </div>
+    </div>
+  </div>
+</a>
