@@ -1,27 +1,39 @@
 import { faCalculator } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { UIColor, UIIcon } from "./ui";
+import { UIColor, UIIcon } from "./ui";
 
 interface Props {
   title: string;
   uiColor: UIColor;
   icon: UIIcon;
+  grow?: boolean;
+  className?: string;
   onClick: () => void;
 }
 
 const IconButton = (props: Props) => {
-  const { icon } = props;
+  const { icon, uiColor } = props;
+
   return (
     <button
       onClick={props.onClick}
-      className="hover:bg-rose-300 bg-rose-200 px-3 py-1.5 
+      className={`
+      ${uiColor == UIColor.Primary ? " hover:bg-sky-100 bg-sky-200" : ""}
+      ${uiColor == UIColor.Secondary ? " hover:bg-rose-100 bg-rose-200" : ""}
+      ${uiColor == UIColor.Tertiary ? " hover:bg-orange-100 bg-orange-200" : ""}
+      ${uiColor == UIColor.Ghost ? " hover:bg-slate-600 bg-slate-700" : ""}
+      px-3 py-1.5 
       rounded-lg border-none surface-inner-shadow-and-thick
        text-slate-900 font-bold text-lg
        transition-all flex items-center
        hover:translate-y-1
        flex-grow
+       ${props.grow ? "" : "xs:flex-grow-0"}
        justify-center
-       "
+       h-9
+       ${props.className}
+       
+       `}
     >
       <svg
         height="20px"

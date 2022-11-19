@@ -43,9 +43,11 @@ let examples: {
   class="bg-slate-900 rounded-tr-lg rounded-br-lg p-3 pb-5 thick-shadow mr-5"
 >
   <h2 class="text-2xl leading-none font-bold text-white">Examples</h2>
-  {
-    examples.map((e) => (
-      <ExamplesSidebarEntry subtitle={e.subtitle} items={e.items} />
-    ))
-  }
+  <div class="hidden md:block">
+    {
+      examples.map((e) => (
+        <ExamplesSidebarEntry subtitle={e.subtitle} items={e.items} />
+      ))
+    }
+  </div>
 </div>

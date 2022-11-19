@@ -12,14 +12,17 @@ import DistributionCalculator from "../components/react/DistributionCalculator";
 <Layout title="Dice Calculator">
   <main>
     <HeadPanel />
-    <div class="mt-5 flex">
-      <div class="">
+    <div class="md:flex">
+      <div class="mt-5">
         <ExamplesSidebar />
       </div>
-      <div>
-        <LearnMoreHeader />
-        <div class="mt-5">
-          <DistributionCalculator client:load />
+
+      <div class="flex-grow mt-5">
+        <div class="max-w-4xl">
+          <LearnMoreHeader />
+          <div class="mt-5">
+            <DistributionCalculator client:load />
+          </div>
         </div>
       </div>
     </div>
