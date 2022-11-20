@@ -5,35 +5,43 @@ import { Icons, UIColor, diceIndexToUiColor } from "./ui";
 
 import { Actions, AppState } from "./store";
 import { useDispatch, useSelector } from "react-redux";
+import CloseButton from "./CloseButton";
 
 interface Props {
   diceIndex: 0 | 1 | 2;
 }
 
 const DiceInputSegment = (props: Props) => {
-  const con: number = useSelector((state: AppState) => {
-    return state.counter;
+  const { diceIndex } = props;
+  const { inputValue } = useSelector((state: AppState) => {
+    let segment = state.inputSegments[diceIndex];
+    return segment;
   });
   const dispatch = useDispatch();
 
   let color: UIColor = diceIndexToUiColor(props.diceIndex);
   return (
-    <div className="mt-5 pb-2.5">
-      <div className="p-5 bg-green-500">
-        {con}
-        <br></br>
-        <button
-          onClick={() => {
-            console.log("inc");
-            dispatch(Actions.addDice({}));
-          }}
-        >
-          Increment
-        </button>
-      </div>
+    <div className="mt-5 pb-2.5 relative">
+      {/* {true && (
+        <div className="absolute -right-1 -top-1">
+          <CloseButton onChange={() => {}}></CloseButton>
+        </div>
+      )} */}
+
       <div className="flex">
         <div className="flex-grow">
-          <InputField placeholder="2d6" onChange={() => {}}></InputField>
+          <InputField
+            placeholder="2d6"
+            value={inputValue}
+            onChange={(value) => {
+              dispatch(
+                Actions.changeInput({
+                  diceIndex: diceIndex,
+                  value,
+                })
+              );
+            }}
+          ></InputField>
         </div>
         <div></div>
       </div>

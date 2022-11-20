@@ -1,25 +1,34 @@
-import { Provider } from "react-redux";
+import { Provider, useDispatch, useSelector } from "react-redux";
 import DiceInputSegment from "./DiceInputSegment";
 import IconButton from "./IconButton";
 import InputField from "./InputField";
-import { store } from "./store";
+import { Actions, AppState } from "./store";
+
 import { UIColor, Icons } from "./ui";
 
 const DistributionCalculator = () => {
+  const diceIndexes = useSelector((state: AppState) => {
+    return state.inputSegments.map((e) => e.diceIndex);
+  });
+  const dispatch = useDispatch();
   return (
-    <Provider store={store}>
-      <div>
-        <DiceInputSegment diceIndex={1}></DiceInputSegment>
-        <DiceInputSegment diceIndex={2}></DiceInputSegment>
+    <div>
+      {diceIndexes.map((i) => (
+        <DiceInputSegment key={i} diceIndex={i}></DiceInputSegment>
+      ))}
+
+      {diceIndexes.length < 3 && (
         <IconButton
           className={"mt-5"}
           uiColor={UIColor.Ghost}
           title="Add dice to compare"
           icon={Icons.add}
-          onClick={() => {}}
+          onClick={() => {
+            dispatch(Actions.addDice({}));
+          }}
         ></IconButton>
-      </div>
-    </Provider>
+      )}
+    </div>
   );
 };
 

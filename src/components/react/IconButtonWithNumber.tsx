@@ -20,14 +20,13 @@ const IconButtonWithNumber = (props: Props) => {
       ${uiColor == UIColor.Primary ? " hover:bg-sky-100 bg-sky-200" : ""}
       ${uiColor == UIColor.Secondary ? " hover:bg-rose-100 bg-rose-200" : ""}
       ${uiColor == UIColor.Tertiary ? " hover:bg-orange-100 bg-orange-200" : ""}
-      px-3 py-1.5 
+      px-3 py-1 
       rounded-lg border-none surface-inner-shadow-and-thick
        text-slate-900 font-bold text-lg
        transition-all flex items-center
        hover:translate-y-1
        justify-center
        flex-grow xs:flex-grow-0
-       h-9
        ${props.className}`}
     >
       <svg

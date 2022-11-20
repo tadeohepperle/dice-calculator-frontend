@@ -30,7 +30,6 @@ const IconButton = (props: Props) => {
        flex-grow
        ${props.grow ? "" : "xs:flex-grow-0"}
        justify-center
-       h-9
        ${props.className}
        
        `}
@@ -38,7 +37,7 @@ const IconButton = (props: Props) => {
       <svg
         height="20px"
         width="20px"
-        className="mr-2"
+        className={props.title ? "mr-2" : ""}
         xmlns="http://www.w3.org/2000/svg"
         viewBox={icon.viewBox}
       >

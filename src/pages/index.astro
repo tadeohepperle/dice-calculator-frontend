@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {} from "@fortawesome/free-solid-svg-icons";
 import ExamplesSidebar from "../components/ExamplesSidebar.astro";
 import LearnMoreHeader from "../components/LearnMoreHeader.astro";
-import DistributionCalculator from "../components/react/DistributionCalculator";
+import DistributionCalculatorWrapper from "../components/react/DistributionCalculatorWrapper";
 ---
 
 <Layout title="Dice Calculator">
@@ -18,10 +18,10 @@ import DistributionCalculator from "../components/react/DistributionCalculator";
       </div>
 
       <div class="flex-grow mt-5">
-        <div class="max-w-4xl">
+        <div class="max-w-4xl p-3">
           <LearnMoreHeader />
           <div class="mt-5">
-            <DistributionCalculator client:load />
+            <DistributionCalculatorWrapper client:load />
           </div>
         </div>
       </div>

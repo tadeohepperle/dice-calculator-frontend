@@ -4,20 +4,27 @@ export type DiceIndex = 0 | 1 | 2;
 
 export interface DiceInputSegmentState {
   diceIndex: DiceIndex;
-  inputField: string;
+  inputValue: string;
+  rolledNumber?: number;
+  rolledNumbers?: number[];
 }
 
 export interface AppState {
-  counter: number;
+  inputSegments: DiceInputSegmentState[];
 }
 
 const initialState: AppState = {
-  counter: 0,
+  inputSegments: [
+    {
+      diceIndex: 0,
+      inputValue: "2d20",
+    },
+  ],
 };
 
 export interface AbstractAppStateAction<T> extends Action<string> {
   type: string;
-  payload?: T;
+  payload: T;
   error?: boolean;
   meta?: any;
 }
@@ -53,7 +60,7 @@ export namespace Actions {
     type: "AddDice";
   }
   export function addDice(payload: AddDicePayload): AddDice {
-    return { type: "AddDice" };
+    return { type: "AddDice", payload: {} };
   }
 
   export type AppStateAction = ChangeInput | DeleteDice | AddDice;
@@ -68,15 +75,28 @@ const rootReducer: Reducer<AppState, Actions.AppStateAction> = (
   }
   try {
     if (action.type == "ChangeInput") {
-      let a = action as Actions.ChangeInput;
-      return { ...state };
+      let { payload } = action as Actions.ChangeInput;
+      console.log(payload);
+      let seg: DiceInputSegmentState = {
+        ...state.inputSegments[payload.diceIndex],
+        inputValue: payload.value,
+      };
+      let segs = state.inputSegments.map((e, i) =>
+        i == payload.diceIndex ? seg : e
+      );
+
+      return { ...state, inputSegments: segs };
     } else if (action.type == "DeleteDice") {
       let a = action as Actions.DeleteDice;
       return { ...state };
     } else if (action.type == "AddDice") {
-      console.log("dispatched adddice");
-      let a = action as Actions.AddDice;
-      return { ...state, counter: state.counter + 1 };
+      if (state.inputSegments.length < 3) {
+        let newSeg: DiceInputSegmentState = {
+          diceIndex: state.inputSegments.length as DiceIndex,
+          inputValue: "",
+        };
+        return { ...state, inputSegments: [...state.inputSegments, newSeg] };
+      }
     } else {
       // ERROR : `Circle` is not assignable to `never`
       const _exhaustiveCheck: never = action;
