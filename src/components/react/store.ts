@@ -84,11 +84,13 @@ const rootReducer: Reducer<AppState, Actions.AppStateAction> = (
       let segs = state.inputSegments.map((e, i) =>
         i == payload.diceIndex ? seg : e
       );
-
       return { ...state, inputSegments: segs };
     } else if (action.type == "DeleteDice") {
-      let a = action as Actions.DeleteDice;
-      return { ...state };
+      let { payload } = action as Actions.DeleteDice;
+      let segs = state.inputSegments.filter(
+        (e) => e.diceIndex != payload.diceIndex
+      );
+      return { ...state, inputSegments: segs };
     } else if (action.type == "AddDice") {
       if (state.inputSegments.length < 3) {
         let newSeg: DiceInputSegmentState = {

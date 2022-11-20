@@ -6,7 +6,7 @@ interface Props {
   title: string;
   uiColor: UIColor;
   icon: UIIcon;
-  grow?: boolean;
+  grow: "none" | "normal" | "dominant";
   className?: string;
   onClick: () => void;
 }
@@ -27,8 +27,9 @@ const IconButton = (props: Props) => {
        text-slate-900 font-bold text-lg
        transition-all flex items-center
        hover:translate-y-1
-       flex-grow
-       ${props.grow ? "" : "xs:flex-grow-0"}
+       
+       ${props.grow == "normal" ? "flex-grow xs:flex-grow-0" : ""}
+       ${props.grow == "dominant" ? "flex-grow" : ""}
        justify-center
        ${props.className}
        

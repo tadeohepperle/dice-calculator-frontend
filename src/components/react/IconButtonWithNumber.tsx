@@ -9,6 +9,7 @@ interface Props {
   onClick: () => void;
   number: number;
   className?: string;
+  grow: "none" | "normal" | "dominant";
 }
 
 const IconButtonWithNumber = (props: Props) => {
@@ -26,7 +27,8 @@ const IconButtonWithNumber = (props: Props) => {
        transition-all flex items-center
        hover:translate-y-1
        justify-center
-       flex-grow xs:flex-grow-0
+       ${props.grow == "normal" ? "flex-grow xs:flex-grow-0" : ""}
+       ${props.grow == "dominant" ? "flex-grow" : ""}
        ${props.className}`}
     >
       <svg

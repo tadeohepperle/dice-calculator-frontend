@@ -43,7 +43,18 @@ const DiceInputSegment = (props: Props) => {
             }}
           ></InputField>
         </div>
-        <div></div>
+        {diceIndex != 0 && (
+          <IconButton
+            className="ml-4"
+            uiColor={color}
+            title=""
+            onClick={() => {
+              dispatch(Actions.deleteDice({ diceIndex: diceIndex }));
+            }}
+            icon={Icons.trash}
+            grow="none"
+          ></IconButton>
+        )}
       </div>
       <div className="flex flex-wrap">
         <IconButton
@@ -52,7 +63,7 @@ const DiceInputSegment = (props: Props) => {
           title="Calculate Distribution"
           onClick={() => {}}
           icon={Icons.calculator}
-          grow={true}
+          grow="dominant"
         ></IconButton>
         <div className="basis-full xs:basis-auto xs:mr-5"></div>
         <IconButton
@@ -61,6 +72,7 @@ const DiceInputSegment = (props: Props) => {
           title="Roll"
           onClick={() => {}}
           icon={Icons.d20}
+          grow="normal"
         ></IconButton>
         <div className="mr-5"></div>
         <IconButtonWithNumber
@@ -70,6 +82,7 @@ const DiceInputSegment = (props: Props) => {
           title="Roll"
           onClick={() => {}}
           icon={Icons.d20}
+          grow="normal"
         ></IconButtonWithNumber>
       </div>
     </div>
