@@ -1,4 +1,5 @@
 import { Provider, useDispatch, useSelector } from "react-redux";
+import { hello } from "../../functions";
 import DiceInputSegment from "./DiceInputSegment";
 import IconButton from "./IconButton";
 import InputField from "./InputField";
@@ -26,6 +27,7 @@ const DistributionCalculator = () => {
           onClick={() => {
             dispatch(Actions.addDice({}));
           }}
+          grow="none"
         ></IconButton>
       )}
     </div>

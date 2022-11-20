@@ -1,4 +1,6 @@
 import { configureStore, Reducer, Action } from "@reduxjs/toolkit";
+import { hello } from "../../functions";
+// import { calculateDistributionWithRust } from "../../functions";
 
 export type DiceIndex = 0 | 1 | 2;
 
@@ -42,6 +44,30 @@ export namespace Actions {
     return { type: "ChangeInput", payload };
   }
 
+  export interface CalculateDistributionPayload {
+    diceIndex: DiceIndex;
+  }
+  export interface CalculateDistribution
+    extends AbstractAppStateAction<CalculateDistributionPayload> {
+    type: "CalculateDistribution";
+  }
+  export function calculateDistribution(
+    payload: CalculateDistributionPayload
+  ): CalculateDistribution {
+    return { type: "CalculateDistribution", payload };
+  }
+
+  export interface RollPayload {
+    diceIndex: DiceIndex;
+    mode: { type: "one" } | { type: "many"; amount: number };
+  }
+  export interface Roll extends AbstractAppStateAction<RollPayload> {
+    type: "Roll";
+  }
+  export function roll(payload: RollPayload): Roll {
+    return { type: "Roll", payload };
+  }
+
   export interface DeleteDicePayload {
     diceIndex: DiceIndex;
   }
@@ -63,7 +89,12 @@ export namespace Actions {
     return { type: "AddDice", payload: {} };
   }
 
-  export type AppStateAction = ChangeInput | DeleteDice | AddDice;
+  export type AppStateAction =
+    | ChangeInput
+    | DeleteDice
+    | AddDice
+    | CalculateDistribution
+    | Roll;
 }
 
 const rootReducer: Reducer<AppState, Actions.AppStateAction> = (
@@ -75,6 +106,7 @@ const rootReducer: Reducer<AppState, Actions.AppStateAction> = (
   }
   try {
     if (action.type == "ChangeInput") {
+      hello();
       let { payload } = action as Actions.ChangeInput;
       console.log(payload);
       let seg: DiceInputSegmentState = {
@@ -87,9 +119,14 @@ const rootReducer: Reducer<AppState, Actions.AppStateAction> = (
       return { ...state, inputSegments: segs };
     } else if (action.type == "DeleteDice") {
       let { payload } = action as Actions.DeleteDice;
-      let segs = state.inputSegments.filter(
-        (e) => e.diceIndex != payload.diceIndex
-      );
+      let segs: DiceInputSegmentState[] = state.inputSegments
+        .filter((e) => e.diceIndex != payload.diceIndex)
+        .map((e) =>
+          e.diceIndex <= payload.diceIndex
+            ? e
+            : { ...e, diceIndex: (e.diceIndex - 1) as DiceIndex }
+        );
+
       return { ...state, inputSegments: segs };
     } else if (action.type == "AddDice") {
       if (state.inputSegments.length < 3) {
@@ -99,6 +136,20 @@ const rootReducer: Reducer<AppState, Actions.AppStateAction> = (
         };
         return { ...state, inputSegments: [...state.inputSegments, newSeg] };
       }
+    } else if (action.type == "CalculateDistribution") {
+      let { payload } = action as Actions.CalculateDistribution;
+      let diceString = state.inputSegments[payload.diceIndex].inputValue;
+      if (diceString !== "") {
+        // let dist = calculateDistributionWithRust(
+        //   state.inputSegments[payload.diceIndex].inputValue
+        // );
+      } else {
+        // remove distribution; TODO
+      }
+
+      return { ...state };
+    } else if (action.type == "Roll") {
+      return { ...state };
     } else {
       // ERROR : `Circle` is not assignable to `never`
       const _exhaustiveCheck: never = action;
