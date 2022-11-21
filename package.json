@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "cp ../../rust/dices/pkg/dices_bg.wasm . && astro dev",
+    "dev": "cp ../../rust/dices/pkg ./public/js/pkg -r && astro dev",
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",

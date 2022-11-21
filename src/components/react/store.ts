@@ -1,6 +1,11 @@
 import { configureStore, Reducer, Action } from "@reduxjs/toolkit";
-import { buildDiceWithWASM, hello, mscounter, wait } from "../../functions";
+import { mscounter } from "../../functions_depr";
+import { workerExperiment } from "../../webworker_functions";
+// import { wasmComputeDice } from "../../webworker_functions";
+
 // import { calculateDistributionWithRust } from "../../functions";
+
+workerExperiment();
 
 export type DiceIndex = 0 | 1 | 2;
 
@@ -171,12 +176,14 @@ const rootReducer: Reducer<AppState, Actions.AppStateAction> = (
         diceString: string
       ) => {
         if (diceString !== "") {
-          buildDiceWithWASM(diceString);
+          // let d = await wasmComputeDice(diceString);
+          console.log("fuck you TODO");
         } else {
           // remove distribution; TODO
         }
       };
       doCalculations(payload.diceIndex, diceString);
+      // TODO!!! move to webworker thread.
       mscounter();
       let seg: DiceInputSegmentState = {
         ...state.inputSegments[payload.diceIndex],
@@ -215,11 +222,3 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
-
-// (state: AppState, action: AppStateAction) => AppState
-
-async function kickoffFuture() {
-  await wait(1000);
-  console.log("Waited");
-  store.dispatch(Actions.changeInput({ diceIndex: 0, value: "Hello" }));
-}
