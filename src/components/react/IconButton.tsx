@@ -8,32 +8,46 @@ interface Props {
   icon: UIIcon;
   grow: "none" | "normal" | "dominant";
   className?: string;
-  onClick: () => void;
+  onClick: (() => void) | null;
 }
 
 const IconButton = (props: Props) => {
-  const { icon, uiColor } = props;
+  const { icon, uiColor, onClick } = props;
+  const active = !!onClick;
 
   return (
     <button
-      onClick={props.onClick}
+      onClick={active ? onClick : () => {}}
       className={`
-      ${uiColor == UIColor.Primary ? " hover:bg-sky-100 bg-sky-200" : ""}
-      ${uiColor == UIColor.Secondary ? " hover:bg-rose-100 bg-rose-200" : ""}
-      ${uiColor == UIColor.Tertiary ? " hover:bg-orange-100 bg-orange-200" : ""}
-      ${uiColor == UIColor.Ghost ? " hover:bg-slate-600 bg-slate-700" : ""}
+      ${!active ? " bg-gray-400 cursor-default" : ""}
+      ${
+        active && uiColor == UIColor.Primary
+          ? " hover:bg-sky-100 bg-sky-200"
+          : ""
+      }
+      ${
+        active && uiColor == UIColor.Secondary
+          ? " hover:bg-rose-100 bg-rose-200"
+          : ""
+      }
+      ${
+        active && uiColor == UIColor.Tertiary
+          ? " hover:bg-orange-100 bg-orange-200"
+          : ""
+      }
+      ${
+        active && uiColor == UIColor.Ghost
+          ? " hover:bg-slate-600 bg-slate-700"
+          : ""
+      }
       px-3 py-1.5 
       rounded-lg border-none surface-inner-shadow-and-thick
        text-slate-900 font-bold text-lg
-       transition-all flex items-center
-       hover:translate-y-1
-       
+       transition-all flex items-center justify-center
+       ${active ? "hover:translate-y-1" : ""}
        ${props.grow == "normal" ? "flex-grow xs:flex-grow-0" : ""}
        ${props.grow == "dominant" ? "flex-grow" : ""}
-       justify-center
-       ${props.className}
-       
-       `}
+       ${props.className}`}
     >
       <svg
         height="20px"

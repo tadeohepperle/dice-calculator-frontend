@@ -6,27 +6,47 @@ interface Props {
   title: string;
   uiColor: UIColor;
   icon: UIIcon;
-  onClick: () => void;
+  onClick: (() => void) | null;
+  onChangeNumber: (value: number) => void;
   number: number;
   className?: string;
   grow: "none" | "normal" | "dominant";
 }
 
 const IconButtonWithNumber = (props: Props) => {
-  const { icon, uiColor } = props;
+  const { icon, uiColor, onChangeNumber, onClick } = props;
+  const active = !!onClick;
+
   return (
     <button
-      onClick={props.onClick}
+      onClick={active ? onClick : () => {}}
       className={`
-      ${uiColor == UIColor.Primary ? " hover:bg-sky-100 bg-sky-200" : ""}
-      ${uiColor == UIColor.Secondary ? " hover:bg-rose-100 bg-rose-200" : ""}
-      ${uiColor == UIColor.Tertiary ? " hover:bg-orange-100 bg-orange-200" : ""}
+      ${!active ? " bg-gray-400 cursor-default" : ""}
+      ${
+        active && uiColor == UIColor.Primary
+          ? " hover:bg-sky-100 bg-sky-200"
+          : ""
+      }
+      ${
+        active && uiColor == UIColor.Secondary
+          ? " hover:bg-rose-100 bg-rose-200"
+          : ""
+      }
+      ${
+        active && uiColor == UIColor.Tertiary
+          ? " hover:bg-orange-100 bg-orange-200"
+          : ""
+      }
+      ${
+        active && uiColor == UIColor.Ghost
+          ? " hover:bg-slate-600 bg-slate-700"
+          : ""
+      }
       px-3 py-1 
       rounded-lg border-none surface-inner-shadow-and-thick
        text-slate-900 font-bold text-lg
-       transition-all flex items-center
-       hover:translate-y-1
-       justify-center
+       transition-all flex items-center justify-center
+       ${active ? "hover:translate-y-1" : ""}
        ${props.grow == "normal" ? "flex-grow xs:flex-grow-0" : ""}
        ${props.grow == "dominant" ? "flex-grow" : ""}
        ${props.className}`}
@@ -44,7 +64,12 @@ const IconButtonWithNumber = (props: Props) => {
       {props.title}
       <input
         onChange={(e) => {
-          // TODO;
+          try {
+            let n: number = parseInt(e.target.value);
+            onChangeNumber(n);
+          } catch (ex) {
+            console.log(ex); // should never happen
+          }
         }}
         type="number"
         id="first_name"

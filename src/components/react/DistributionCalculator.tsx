@@ -3,22 +3,31 @@ import { hello } from "../../functions";
 import DiceInputSegment from "./DiceInputSegment";
 import IconButton from "./IconButton";
 import InputField from "./InputField";
-import { Actions, AppState } from "./store";
+import { Actions, AppState, CalculationState, DiceIndex } from "./store";
 
 import { UIColor, Icons } from "./ui";
 
 const DistributionCalculator = () => {
-  const diceIndexes = useSelector((state: AppState) => {
-    return state.inputSegments.map((e) => e.diceIndex);
+  const segmentStates: {
+    diceIndex: DiceIndex;
+    calculationState: CalculationState;
+  }[] = useSelector((state: AppState) => {
+    return state.inputSegments.map((e) => {
+      return { diceIndex: e.diceIndex, calculationState: e.calculationState };
+    });
   });
   const dispatch = useDispatch();
   return (
     <div>
-      {diceIndexes.map((i) => (
-        <DiceInputSegment key={i} diceIndex={i}></DiceInputSegment>
+      {segmentStates.map((e) => (
+        <DiceInputSegment
+          key={e.diceIndex}
+          diceIndex={e.diceIndex}
+          calculationState={e.calculationState}
+        ></DiceInputSegment>
       ))}
 
-      {diceIndexes.length < 3 && (
+      {segmentStates.length < 3 && (
         <IconButton
           className={"mt-5"}
           uiColor={UIColor.Ghost}

@@ -1,14 +1,21 @@
 import { configureStore, Reducer, Action } from "@reduxjs/toolkit";
-import { hello } from "../../functions";
+import { buildDiceWithWASM, hello, mscounter, wait } from "../../functions";
 // import { calculateDistributionWithRust } from "../../functions";
 
 export type DiceIndex = 0 | 1 | 2;
 
+export type CalculationState = "newinput" | "calculating" | "done" | "error";
+
 export interface DiceInputSegmentState {
   diceIndex: DiceIndex;
   inputValue: string;
+  rollResults?:
+    | { type: "one"; number: number }
+    | { type: "many"; numbers: number[] };
   rolledNumber?: number;
   rolledNumbers?: number[];
+  calculationState: CalculationState;
+  rollManyNumber: number; // how many dice to roll when "roll many" button is clicked.
 }
 
 export interface AppState {
@@ -20,6 +27,8 @@ const initialState: AppState = {
     {
       diceIndex: 0,
       inputValue: "2d20",
+      calculationState: "newinput",
+      rollManyNumber: 100,
     },
   ],
 };
@@ -42,6 +51,20 @@ export namespace Actions {
   }
   export function changeInput(payload: ChangeInputPayload): ChangeInput {
     return { type: "ChangeInput", payload };
+  }
+
+  export interface ChangeRollManyNumberPayload {
+    value: number;
+    diceIndex: DiceIndex;
+  }
+  export interface ChangeRollManyNumber
+    extends AbstractAppStateAction<ChangeRollManyNumberPayload> {
+    type: "ChangeRollManyNumber";
+  }
+  export function changeRollManyNumber(
+    payload: ChangeRollManyNumberPayload
+  ): ChangeRollManyNumber {
+    return { type: "ChangeRollManyNumber", payload };
   }
 
   export interface CalculateDistributionPayload {
@@ -94,7 +117,8 @@ export namespace Actions {
     | DeleteDice
     | AddDice
     | CalculateDistribution
-    | Roll;
+    | Roll
+    | ChangeRollManyNumber;
 }
 
 const rootReducer: Reducer<AppState, Actions.AppStateAction> = (
@@ -106,12 +130,12 @@ const rootReducer: Reducer<AppState, Actions.AppStateAction> = (
   }
   try {
     if (action.type == "ChangeInput") {
-      hello();
       let { payload } = action as Actions.ChangeInput;
-      console.log(payload);
+
       let seg: DiceInputSegmentState = {
         ...state.inputSegments[payload.diceIndex],
         inputValue: payload.value,
+        calculationState: "newinput",
       };
       let segs = state.inputSegments.map((e, i) =>
         i == payload.diceIndex ? seg : e
@@ -133,25 +157,48 @@ const rootReducer: Reducer<AppState, Actions.AppStateAction> = (
         let newSeg: DiceInputSegmentState = {
           diceIndex: state.inputSegments.length as DiceIndex,
           inputValue: "",
+          calculationState: "newinput",
+          rollManyNumber: 100,
         };
         return { ...state, inputSegments: [...state.inputSegments, newSeg] };
       }
     } else if (action.type == "CalculateDistribution") {
       let { payload } = action as Actions.CalculateDistribution;
-      let diceString = state.inputSegments[payload.diceIndex].inputValue;
-      if (diceString !== "") {
-        // let dist = calculateDistributionWithRust(
-        //   state.inputSegments[payload.diceIndex].inputValue
-        // );
-      } else {
-        // remove distribution; TODO
-      }
 
-      return { ...state };
+      let diceString = state.inputSegments[payload.diceIndex].inputValue;
+      const doCalculations = async (
+        diceIndex: DiceIndex,
+        diceString: string
+      ) => {
+        if (diceString !== "") {
+          buildDiceWithWASM(diceString);
+        } else {
+          // remove distribution; TODO
+        }
+      };
+      doCalculations(payload.diceIndex, diceString);
+      mscounter();
+      let seg: DiceInputSegmentState = {
+        ...state.inputSegments[payload.diceIndex],
+        calculationState: "calculating",
+      };
+      let segs = state.inputSegments.map((e, i) =>
+        i == payload.diceIndex ? seg : e
+      );
+      return { ...state, inputSegments: segs };
     } else if (action.type == "Roll") {
       return { ...state };
+    } else if (action.type == "ChangeRollManyNumber") {
+      let { payload } = action as Actions.ChangeRollManyNumber;
+      let seg: DiceInputSegmentState = {
+        ...state.inputSegments[payload.diceIndex],
+        rollManyNumber: payload.value,
+      };
+      let segs = state.inputSegments.map((e, i) =>
+        i == payload.diceIndex ? seg : e
+      );
+      return { ...state, inputSegments: segs };
     } else {
-      // ERROR : `Circle` is not assignable to `never`
       const _exhaustiveCheck: never = action;
     }
   } catch (err) {
@@ -170,3 +217,9 @@ export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
 // (state: AppState, action: AppStateAction) => AppState
+
+async function kickoffFuture() {
+  await wait(1000);
+  console.log("Waited");
+  store.dispatch(Actions.changeInput({ diceIndex: 0, value: "Hello" }));
+}

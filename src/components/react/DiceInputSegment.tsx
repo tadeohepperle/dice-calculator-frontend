@@ -3,17 +3,18 @@ import IconButtonWithNumber from "./IconButtonWithNumber";
 import InputField from "./InputField";
 import { Icons, UIColor, diceIndexToUiColor } from "./ui";
 
-import { Actions, AppState } from "./store";
+import { Actions, AppState, CalculationState } from "./store";
 import { useDispatch, useSelector } from "react-redux";
 import CloseButton from "./CloseButton";
 
 interface Props {
   diceIndex: 0 | 1 | 2;
+  calculationState: CalculationState;
 }
 
 const DiceInputSegment = (props: Props) => {
-  const { diceIndex } = props;
-  const { inputValue } = useSelector((state: AppState) => {
+  const { diceIndex, calculationState } = props;
+  const { inputValue, rollManyNumber } = useSelector((state: AppState) => {
     let segment = state.inputSegments[diceIndex];
     return segment;
   });
@@ -61,7 +62,15 @@ const DiceInputSegment = (props: Props) => {
           className={"mt-5"}
           uiColor={color}
           title="Calculate Distribution"
-          onClick={() => {}}
+          onClick={
+            calculationState == "newinput"
+              ? () => {
+                  dispatch(
+                    Actions.calculateDistribution({ diceIndex: diceIndex })
+                  );
+                }
+              : null
+          }
           icon={Icons.calculator}
           grow="dominant"
         ></IconButton>
@@ -70,17 +79,47 @@ const DiceInputSegment = (props: Props) => {
           className={"mt-5"}
           uiColor={color}
           title="Roll"
-          onClick={() => {}}
+          onClick={
+            calculationState == "done"
+              ? () => {
+                  dispatch(
+                    Actions.roll({
+                      diceIndex: diceIndex,
+                      mode: { type: "one" },
+                    })
+                  );
+                }
+              : null
+          }
           icon={Icons.d20}
           grow="normal"
         ></IconButton>
         <div className="mr-5"></div>
         <IconButtonWithNumber
           className={"mt-5"}
-          number={100}
+          number={rollManyNumber}
           uiColor={color}
           title="Roll"
-          onClick={() => {}}
+          onChangeNumber={(n) => {
+            dispatch(
+              Actions.changeRollManyNumber({
+                diceIndex: diceIndex,
+                value: n,
+              })
+            );
+          }}
+          onClick={
+            calculationState == "done"
+              ? () => {
+                  dispatch(
+                    Actions.roll({
+                      diceIndex: diceIndex,
+                      mode: { type: "one" },
+                    })
+                  );
+                }
+              : null
+          }
           icon={Icons.d20}
           grow="normal"
         ></IconButtonWithNumber>
