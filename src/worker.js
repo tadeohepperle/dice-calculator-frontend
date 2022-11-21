@@ -1,19 +1,11 @@
-import { greet } from "dices";
+import { greet, JsDice } from "dices";
 
 async function main() {
-  const path_to_wasm = "http://127.0.0.1:3000/js/pkg/dices_bg.wasm";
-  console.info(`going to init wasm`);
-  console.log(greet());
-
-  // await init(path_to_wasm);
-
-  // console.info(`end init wasm`);
-  // self.onmessage = function (msg) {
-  //   console.log(`got message ${msg}`);
-  //   let s = greet();
-  //   console.log(`calc donw ${s}`);
-  //   self.postMessage({ sum: s });
-  // };
+  console.info(`sratcalc`);
+  let g = greet();
+  console.warn(g);
+  let d = JsDice.build_from_string("2d60");
+  console.log(`built in  ${d.build_time}`);
 }
 
 main();
