@@ -1,6 +1,10 @@
 import type { DiceIndex } from "../data_types";
 
-export type CalculationState = "newinput" | "calculating" | "done" | "error";
+export type CalculationState =
+  | "newinput"
+  | "calculating"
+  | "done"
+  | { type: "error"; message: string };
 
 export interface DiceInputSegmentState {
   diceIndex: DiceIndex;

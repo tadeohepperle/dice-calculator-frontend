@@ -1,7 +1,7 @@
 import { configureStore, Reducer, Action } from "@reduxjs/toolkit";
 import { wasmComputeDice } from "../webworker/webworker_interface";
-import type { DiceIndex } from "../data_types";
-import type { Actions } from "./actions";
+import type { DiceIndex, JsDiceMaterialized } from "../data_types";
+import { Actions } from "./actions";
 import { AppState, DiceInputSegmentState, initialState } from "./state";
 
 let ___: Actions.AppStateAction;
@@ -25,6 +25,8 @@ const actionTypeFunctionMap: Record<
       a.payload as Actions.CalculateDistributionPayload
     ),
   Roll: (s, a) => rollReducer(s, a.payload as Actions.RollPayload),
+  AddErrorMessage: (s, a) =>
+    addErrorMessageReducer(s, a.payload as Actions.AddErrorMessagePayload),
 };
 
 const rootReducer: Reducer<AppState, Actions.AppStateAction> = (
@@ -43,6 +45,10 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
+////////////////////////////////////////////////////////////////////////////////
+// INDIVIDUAL REDUCER FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
 
 function changeInputReducer(
   state: AppState,
@@ -109,23 +115,26 @@ function calculateDistributionReducer(
   state: AppState,
   payload: Actions.CalculateDistributionPayload
 ): AppState {
-  let diceString = state.inputSegments[payload.diceIndex].inputValue;
+  let input = state.inputSegments[payload.diceIndex].inputValue;
+
   const doCalculationsAndUpdateState = async (
     diceIndex: DiceIndex,
-    diceString: string
+    input: string
   ) => {
-    if (diceString !== "") {
-      try {
-        let d = await wasmComputeDice(diceString);
-        console.log(`d.build_time: ${d}`);
-      } catch (ex) {
-        console.log(ex);
-      }
-    } else {
-      // remove distribution; TODO
+    if (!input) {
+      store.dispatch(Actions.addErrorMessage(diceIndex, "Input is empty!"));
+    }
+    try {
+      let dice: JsDiceMaterialized = await wasmComputeDice(input);
+      // TODO
+    } catch (ex) {
+      console.error(ex);
+      store.dispatch(
+        Actions.addErrorMessage(diceIndex, "Computation resulted in error")
+      );
     }
   };
-  doCalculationsAndUpdateState(payload.diceIndex, diceString);
+  doCalculationsAndUpdateState(payload.diceIndex, input);
 
   let seg: DiceInputSegmentState = {
     ...state.inputSegments[payload.diceIndex],
@@ -139,4 +148,29 @@ function calculateDistributionReducer(
 
 function rollReducer(state: AppState, payload: Actions.RollPayload): AppState {
   return state;
+}
+
+function addErrorMessageReducer(
+  state: AppState,
+  payload: Actions.AddErrorMessagePayload
+): AppState {
+  const { diceIndex, message } = payload;
+  let seg: DiceInputSegmentState = {
+    ...state.inputSegments[diceIndex],
+    calculationState: { type: "error", message },
+  };
+  return updateSegInState(state, diceIndex, seg);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// functions
+////////////////////////////////////////////////////////////////////////////////
+
+function updateSegInState(
+  state: AppState,
+  diceIndex: DiceIndex,
+  seg: DiceInputSegmentState
+): AppState {
+  let segs = state.inputSegments.map((e, i) => (i == diceIndex ? seg : e));
+  return { ...state, inputSegments: segs };
 }
