@@ -16,7 +16,7 @@ interface Props {
 const DiceInputSegment = (props: Props) => {
   const { diceIndex, calculationState } = props;
   const { inputValue, rollManyNumber } = useSelector((state: AppState) => {
-    let segment = state.inputSegments[diceIndex];
+    let segment = state.inputSegments[diceIndex]!;
     return segment;
   });
   const dispatch = useDispatch();
@@ -65,6 +65,7 @@ const DiceInputSegment = (props: Props) => {
                 }
               : null
           }
+          loading={calculationState == "calculating"}
           icon={Icons.calculator}
           grow="dominant"
         ></IconButton>

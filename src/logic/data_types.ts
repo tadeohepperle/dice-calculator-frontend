@@ -1,16 +1,34 @@
 export type DiceIndex = 0 | 1 | 2;
 
-export type JsDiceMaterialized = any;
-// = Partial<{
-//   // builder_string: string;
-//   // min: number;
-//   // max: number;
-//   // mode: number[];
-//   // median: number;
-//   // mean: number;
-//   // variance: number;
-//   // distribution: any;
-// }>;
+export type JsDiceMaterialized = {
+  build_time: number;
+  builder_string: string;
+  min: bigint;
+  max: bigint;
+  mode: bigint[];
+  median: bigint;
+  mean: JsFractionMaterialized;
+  variance: JsFractionMaterialized;
+  distribution: any; // TODO
+  cumulative_distribution: any; // TODO
+  probability_query: {
+    query: number;
+    result: {
+      lt: JsFractionMaterialized;
+      lte: JsFractionMaterialized;
+      eq: JsFractionMaterialized;
+      gte: JsFractionMaterialized;
+      gt: JsFractionMaterialized;
+    };
+  };
+  percentile_query: {
+    query: number;
+    result: number;
+  };
+};
+
+export type DiceOperationQuery = { type: "prob"; value: number };
+// TODO percentiles
 
 export type JsFractionMaterialized = {
   numer: BigInt;
@@ -18,3 +36,7 @@ export type JsFractionMaterialized = {
   negative: boolean;
   float: number;
 };
+
+export type RollResult =
+  | { type: "one"; number: number }
+  | { type: "many"; numbers: number[] };

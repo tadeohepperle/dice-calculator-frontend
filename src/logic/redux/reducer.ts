@@ -54,14 +54,14 @@ function changeInputReducer(
   state: AppState,
   payload: Actions.ChangeInputPayload
 ): AppState {
+  const { diceIndex } = payload;
   let seg: DiceInputSegmentState = {
-    ...state.inputSegments[payload.diceIndex],
+    ...state.inputSegments[payload.diceIndex]!,
     inputValue: payload.value,
     calculationState: "newinput",
   };
-  let segs = state.inputSegments.map((e, i) =>
-    i == payload.diceIndex ? seg : e
-  );
+  let dice;
+  let segs = { ...state.inputSegments, [diceIndex]: seg };
   return { ...state, inputSegments: segs };
 }
 
@@ -69,14 +69,8 @@ function deleteDiceReducer(
   state: AppState,
   payload: Actions.DeleteDicePayload
 ): AppState {
-  let segs: DiceInputSegmentState[] = state.inputSegments
-    .filter((e) => e.diceIndex != payload.diceIndex)
-    .map((e) =>
-      e.diceIndex <= payload.diceIndex
-        ? e
-        : { ...e, diceIndex: (e.diceIndex - 1) as DiceIndex }
-    );
-
+  const { diceIndex } = payload;
+  let segs = { ...state.inputSegments, [diceIndex]: undefined };
   return { ...state, inputSegments: segs };
 }
 
@@ -84,14 +78,18 @@ function addDiceReducer(
   state: AppState,
   payload: Actions.AddDicePayload
 ): AppState {
-  if (state.inputSegments.length < 3) {
-    let newSeg: DiceInputSegmentState = {
-      diceIndex: state.inputSegments.length as DiceIndex,
+  let numSegs: DiceIndex = (1 +
+    (state.inputSegments[1] ? 1 : 0) +
+    (state.inputSegments[2] ? 1 : 0)) as DiceIndex;
+
+  if (numSegs < 3) {
+    let seg: DiceInputSegmentState = {
+      diceIndex: numSegs,
       inputValue: "",
       calculationState: "newinput",
       rollManyNumber: 100,
     };
-    return { ...state, inputSegments: [...state.inputSegments, newSeg] };
+    return updateSegInState(state, numSegs, seg);
   } else {
     return state;
   }
@@ -101,21 +99,19 @@ function changeRollManyNumberReducer(
   state: AppState,
   payload: Actions.ChangeRollManyNumberPayload
 ): AppState {
+  const { diceIndex, value } = payload;
   let seg: DiceInputSegmentState = {
-    ...state.inputSegments[payload.diceIndex],
-    rollManyNumber: payload.value,
+    ...state.inputSegments[diceIndex]!,
+    rollManyNumber: value,
   };
-  let segs = state.inputSegments.map((e, i) =>
-    i == payload.diceIndex ? seg : e
-  );
-  return { ...state, inputSegments: segs };
+  return updateSegInState(state, diceIndex, seg);
 }
 
 function calculateDistributionReducer(
   state: AppState,
   payload: Actions.CalculateDistributionPayload
 ): AppState {
-  let input = state.inputSegments[payload.diceIndex].inputValue;
+  let input = state.inputSegments[payload.diceIndex]!.inputValue;
 
   const doCalculationsAndUpdateState = async (
     diceIndex: DiceIndex,
@@ -125,7 +121,12 @@ function calculateDistributionReducer(
       store.dispatch(Actions.addErrorMessage(diceIndex, "Input is empty!"));
     }
     try {
-      let dice: JsDiceMaterialized = await wasmComputeDice(input);
+      let dice: JsDiceMaterialized = await wasmComputeDice(
+        diceIndex,
+        input,
+        state.percentile_query,
+        state.probability_query
+      );
 
       // TODO
     } catch (ex) {
@@ -138,13 +139,10 @@ function calculateDistributionReducer(
   doCalculationsAndUpdateState(payload.diceIndex, input);
 
   let seg: DiceInputSegmentState = {
-    ...state.inputSegments[payload.diceIndex],
+    ...state.inputSegments[payload.diceIndex]!,
     calculationState: "calculating",
   };
-  let segs = state.inputSegments.map((e, i) =>
-    i == payload.diceIndex ? seg : e
-  );
-  return { ...state, inputSegments: segs };
+  return updateSegInState(state, payload.diceIndex, seg);
 }
 
 function rollReducer(state: AppState, payload: Actions.RollPayload): AppState {
@@ -157,7 +155,7 @@ function addErrorMessageReducer(
 ): AppState {
   const { diceIndex, message } = payload;
   let seg: DiceInputSegmentState = {
-    ...state.inputSegments[diceIndex],
+    ...state.inputSegments[diceIndex]!,
     calculationState: { type: "error", message },
   };
   return updateSegInState(state, diceIndex, seg);
@@ -172,6 +170,8 @@ function updateSegInState(
   diceIndex: DiceIndex,
   seg: DiceInputSegmentState
 ): AppState {
-  let segs = state.inputSegments.map((e, i) => (i == diceIndex ? seg : e));
-  return { ...state, inputSegments: segs };
+  return {
+    ...state,
+    inputSegments: { ...state.inputSegments, [diceIndex]: seg },
+  };
 }

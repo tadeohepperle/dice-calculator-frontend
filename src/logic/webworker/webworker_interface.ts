@@ -1,5 +1,6 @@
 import type { JsDice } from "dices";
-import type { JsDiceMaterialized } from "../data_types";
+import type { DiceIndex, JsDiceMaterialized } from "../data_types";
+import { WorkerMessages } from "./worker_messages";
 
 import Worker from "./worker.ts?worker";
 
@@ -25,15 +26,24 @@ if (window.Worker) {
 ////////////////////////////////////////////////////////////////////////////////
 
 export async function wasmComputeDice(
-  input: string
+  diceIndex: DiceIndex,
+  input: string,
+  percentile_query: number,
+  probability_query: number
 ): Promise<JsDiceMaterialized> {
   if (!worker) {
     throw "Cannot compute dice, because worker is not setup!";
   }
-  let diceMaterialized = await postMessageAndAwaitResult(worker, {
-    type: "calculate",
+  let message = WorkerMessages.calculateMessage(
+    diceIndex,
     input,
-  });
+    percentile_query,
+    probability_query
+  );
+  let { payload: diceMaterialized } = await postMessageAndAwaitResponse<
+    WorkerMessages.CalculateMessage,
+    WorkerMessages.CalculateResponse
+  >(worker, message);
   console.log(`Main recieved diceMaterialized:`, diceMaterialized);
   return diceMaterialized as JsDiceMaterialized;
 }
@@ -51,12 +61,15 @@ export async function wasmComputeDice(
  * @param message should satisfy { type: string }
  * @returns the appropriate response to the message
  */
-function postMessageAndAwaitResult(worker: Worker, message: any): Promise<any> {
+function postMessageAndAwaitResponse<
+  M extends WorkerMessages.WorkerMessage,
+  R extends WorkerMessages.WorkerResponse
+>(worker: Worker, message: M): Promise<R> {
   return new Promise((res, rej) => {
     try {
       const id = Math.random();
       const listener = function (e: MessageEvent<any>) {
-        let returnedData = e.data;
+        let returnedData: WorkerMessages.PackedWorkerResponse<R> = e.data;
         if (returnedData.id == id) {
           worker.removeEventListener("message", listener, false);
           if (returnedData.failed) {
@@ -67,7 +80,11 @@ function postMessageAndAwaitResult(worker: Worker, message: any): Promise<any> {
         }
       };
       worker.addEventListener("message", listener, false);
-      worker.postMessage({ id, message });
+      const packedMessage: WorkerMessages.PackedWorkerMessage<M> = {
+        id,
+        message,
+      };
+      worker.postMessage(packedMessage);
     } catch (ex) {
       rej(ex);
     }

@@ -13,9 +13,13 @@ const DistributionCalculator = () => {
     diceIndex: DiceIndex;
     calculationState: CalculationState;
   }[] = useSelector((state: AppState) => {
-    return state.inputSegments.map((e) => {
-      return { diceIndex: e.diceIndex, calculationState: e.calculationState };
-    });
+    return [0, 1, 2]
+      .map((i) => state.inputSegments[i as DiceIndex])
+      .filter((e) => e !== undefined)
+      .map((e) => {
+        const { diceIndex, calculationState } = e!;
+        return { diceIndex, calculationState };
+      });
   });
   const dispatch = useDispatch();
   return (
