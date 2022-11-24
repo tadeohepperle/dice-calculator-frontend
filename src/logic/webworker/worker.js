@@ -41,21 +41,43 @@ onmessage = function (e) {
 ////////////////////////////////////////////////////////////////////////////////
 
 function calculateHandler(message) {
-  const { input } = message;
-
-  d = JsDice.build_from_string(input);
+  const { input, diceIndex, query } = message;
+  const d = JsDice.build_from_string(input);
   console.log(`built dice from ${input} and rolled ${d.roll()}`);
-  return { mean: 4 };
+  return materializeJsDice(d);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-function jsDiceFromPtr(ptr) {
-  const obj = Object.create(JsDice.prototype);
-  obj.ptr = ptr;
-  return obj;
+// because the getters on jsDice are functions and not fields and are therefore not sent to the other thread.
+function materializeJsDice(jsDice) {
+  // const jsDice = JsDice.build_from_string("2d6"); // REMOVE
+
+  // TODO: cumulative_distribution
+  return {
+    build_time: jsDice.build_time,
+    builder_string: jsDice.builder_string,
+    min: jsDice.min,
+    max: jsDice.max,
+    mode: jsDice.mode,
+    median: jsDice.median,
+    mean: materializeJsFraction(jsDice.mean),
+    variance: materializeJsFraction(jsDice.variance),
+    distribution: jsDice.distribution,
+    cumulative_distribution: jsDice.cumulative_distribution,
+  };
+}
+
+// because the getters on jsFraction are functions and not fields and are therefore not sent to the other thread.
+function materializeJsFraction(jsFraction) {
+  return {
+    numer: jsFraction.numer,
+    denom: jsFraction.denom,
+    negative: jsFraction.negative,
+    float: jsFraction.float,
+  };
 }
 
 function postFail(id, message) {
@@ -65,3 +87,9 @@ function postFail(id, message) {
 function postSuccess(id, message) {
   self.postMessage({ failed: false, id, message });
 }
+
+// function jsDiceFromPtr(ptr) {
+//   const obj = Object.create(JsDice.prototype);
+//   obj.ptr = ptr;
+//   return obj;
+// }

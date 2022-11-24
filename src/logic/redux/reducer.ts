@@ -40,7 +40,7 @@ const rootReducer: Reducer<AppState, Actions.AppStateAction> = (
 
 export const store = configureStore({
   reducer: rootReducer,
-  preloadedState: initialState,
+  //   preloadedState: initialState,
 });
 
 export type RootState = ReturnType<typeof store.getState>;
@@ -126,6 +126,7 @@ function calculateDistributionReducer(
     }
     try {
       let dice: JsDiceMaterialized = await wasmComputeDice(input);
+
       // TODO
     } catch (ex) {
       console.error(ex);

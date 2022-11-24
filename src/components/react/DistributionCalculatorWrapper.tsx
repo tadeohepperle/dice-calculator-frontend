@@ -1,6 +1,6 @@
 import { Provider } from "react-redux";
+import { store } from "../../logic/redux/reducer";
 import DistributionCalculator from "./DistributionCalculator";
-import { store } from "./store";
 
 const DistributionCalculatorWrapper = () => {
   return (

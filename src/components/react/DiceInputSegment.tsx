@@ -3,9 +3,10 @@ import IconButtonWithNumber from "./IconButtonWithNumber";
 import InputField from "./InputField";
 import { Icons, UIColor, diceIndexToUiColor } from "./ui";
 
-import { Actions, AppState, CalculationState } from "./store";
 import { useDispatch, useSelector } from "react-redux";
 import CloseButton from "./CloseButton";
+import type { AppState, CalculationState } from "../../logic/redux/state";
+import { Actions } from "../../logic/redux/actions";
 
 interface Props {
   diceIndex: 0 | 1 | 2;
@@ -35,12 +36,7 @@ const DiceInputSegment = (props: Props) => {
             placeholder="2d6"
             value={inputValue}
             onChange={(value) => {
-              dispatch(
-                Actions.changeInput({
-                  diceIndex: diceIndex,
-                  value,
-                })
-              );
+              dispatch(Actions.changeInput(diceIndex, value));
             }}
           ></InputField>
         </div>
@@ -50,7 +46,7 @@ const DiceInputSegment = (props: Props) => {
             uiColor={color}
             title=""
             onClick={() => {
-              dispatch(Actions.deleteDice({ diceIndex: diceIndex }));
+              dispatch(Actions.deleteDice(diceIndex));
             }}
             icon={Icons.trash}
             grow="none"
@@ -65,9 +61,7 @@ const DiceInputSegment = (props: Props) => {
           onClick={
             calculationState == "newinput"
               ? () => {
-                  dispatch(
-                    Actions.calculateDistribution({ diceIndex: diceIndex })
-                  );
+                  dispatch(Actions.calculateDistribution(diceIndex));
                 }
               : null
           }
@@ -82,12 +76,7 @@ const DiceInputSegment = (props: Props) => {
           onClick={
             calculationState == "done"
               ? () => {
-                  dispatch(
-                    Actions.roll({
-                      diceIndex: diceIndex,
-                      mode: { type: "one" },
-                    })
-                  );
+                  dispatch(Actions.rollOne(diceIndex));
                 }
               : null
           }
@@ -101,22 +90,12 @@ const DiceInputSegment = (props: Props) => {
           uiColor={color}
           title="Roll"
           onChangeNumber={(n) => {
-            dispatch(
-              Actions.changeRollManyNumber({
-                diceIndex: diceIndex,
-                value: n,
-              })
-            );
+            dispatch(Actions.changeRollManyNumber(diceIndex, n));
           }}
           onClick={
             calculationState == "done"
               ? () => {
-                  dispatch(
-                    Actions.roll({
-                      diceIndex: diceIndex,
-                      mode: { type: "one" },
-                    })
-                  );
+                  dispatch(Actions.rollMany(diceIndex, rollManyNumber));
                 }
               : null
           }

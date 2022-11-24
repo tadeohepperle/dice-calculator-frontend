@@ -1,9 +1,10 @@
 import { Provider, useDispatch, useSelector } from "react-redux";
-import { hello } from "../../functions_depr";
+import type { DiceIndex } from "../../logic/data_types";
+import { Actions } from "../../logic/redux/actions";
+import type { AppState, CalculationState } from "../../logic/redux/state";
 import DiceInputSegment from "./DiceInputSegment";
 import IconButton from "./IconButton";
 import InputField from "./InputField";
-import { Actions, AppState, CalculationState, DiceIndex } from "./store";
 
 import { UIColor, Icons } from "./ui";
 
@@ -34,7 +35,7 @@ const DistributionCalculator = () => {
           title="Add dice to compare"
           icon={Icons.add}
           onClick={() => {
-            dispatch(Actions.addDice({}));
+            dispatch(Actions.addDice());
           }}
           grow="none"
         ></IconButton>
