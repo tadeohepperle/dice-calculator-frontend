@@ -1,7 +1,7 @@
 import type { JsDice } from "dices";
 import type { JsDiceMaterialized } from "../data_types";
 
-import Worker from "./worker.js?worker";
+import Worker from "./worker.ts?worker";
 
 ////////////////////////////////////////////////////////////////////////////////
 // SETUP WEB WORKER

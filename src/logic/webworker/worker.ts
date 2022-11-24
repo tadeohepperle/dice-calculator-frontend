@@ -1,18 +1,16 @@
-import { greet, JsDice } from "dices";
+import { greet, JsDice, JsFraction } from "dices";
 
-let actionTypeFunctionMap = {
+let actionTypeFunctionMap: any = {
   calculate: calculateHandler,
 };
 
 onmessage = function (e) {
   const { id, message } = e.data;
   if (!id || !message) {
-    if (!type) {
-      return postFail(
-        id,
-        `id or message fields missing on event.data: ${JSON.stringify(e.data)}`
-      );
-    }
+    return postFail(
+      id,
+      `id or message fields missing on event.data: ${JSON.stringify(e.data)}`
+    );
   }
   const { type } = message;
   if (!type) {
@@ -40,7 +38,7 @@ onmessage = function (e) {
 // ACTION HANDLERS
 ////////////////////////////////////////////////////////////////////////////////
 
-function calculateHandler(message) {
+function calculateHandler(message: any) {
   const { input, diceIndex, query } = message;
   const d = JsDice.build_from_string(input);
   console.log(`built dice from ${input} and rolled ${d.roll()}`);
@@ -52,7 +50,7 @@ function calculateHandler(message) {
 ////////////////////////////////////////////////////////////////////////////////
 
 // because the getters on jsDice are functions and not fields and are therefore not sent to the other thread.
-function materializeJsDice(jsDice) {
+function materializeJsDice(jsDice: JsDice) {
   // const jsDice = JsDice.build_from_string("2d6"); // REMOVE
 
   // TODO: cumulative_distribution
@@ -71,7 +69,7 @@ function materializeJsDice(jsDice) {
 }
 
 // because the getters on jsFraction are functions and not fields and are therefore not sent to the other thread.
-function materializeJsFraction(jsFraction) {
+function materializeJsFraction(jsFraction: JsFraction) {
   return {
     numer: jsFraction.numer,
     denom: jsFraction.denom,
@@ -80,11 +78,11 @@ function materializeJsFraction(jsFraction) {
   };
 }
 
-function postFail(id, message) {
+function postFail(id: number, message: any) {
   self.postMessage({ failed: true, id, message });
 }
 
-function postSuccess(id, message) {
+function postSuccess(id: number, message: any) {
   self.postMessage({ failed: false, id, message });
 }
 
