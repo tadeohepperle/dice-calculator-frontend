@@ -1,9 +1,9 @@
-import type { DiceIndex, RollResult } from "../data_types";
+import type { DiceIndex, JsDiceMaterialized, RollResult } from "../data_types";
 
 export type CalculationState =
-  | "newinput"
-  | "calculating"
-  | "done"
+  | { type: "newinput" }
+  | { type: "calculating" }
+  | { type: "done" }
   | { type: "error"; message: string };
 
 export interface DiceInputSegmentState {
@@ -24,9 +24,10 @@ export interface AppState {
     1?: DiceInputSegmentState;
     2?: DiceInputSegmentState;
   };
-  probability_query: number;
-  probability_query_mode: ProbabilityQueryMode;
-  percentile_query: number;
+  computedDices: Record<DiceIndex, JsDiceMaterialized | undefined>;
+  probabilityQuery: number;
+  probabilityQueryMode: ProbabilityQueryMode;
+  percentileQuery: number;
 }
 
 export const initialState: AppState = {
@@ -34,11 +35,12 @@ export const initialState: AppState = {
     0: {
       diceIndex: 0,
       inputValue: "2d20",
-      calculationState: "newinput",
+      calculationState: { type: "newinput" },
       rollManyNumber: 100,
     },
   },
-  percentile_query: 90,
-  probability_query: 6,
-  probability_query_mode: "lte",
+  computedDices: { 0: undefined, 1: undefined, 2: undefined },
+  percentileQuery: 90,
+  probabilityQuery: 6,
+  probabilityQueryMode: "lte",
 };

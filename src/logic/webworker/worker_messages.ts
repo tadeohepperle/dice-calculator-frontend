@@ -37,24 +37,24 @@ export namespace WorkerMessages {
     extends AbstractWorkerMessage<{
       diceIndex: DiceIndex;
       input: string;
-      percentile_query: number;
-      probability_query: number;
+      percentileQuery: number;
+      probabilityQuery: number;
     }> {
     type: "Calculate";
   }
   export function calculateMessage(
     diceIndex: DiceIndex,
     input: string,
-    percentile_query: number,
-    probability_query: number
+    percentileQuery: number,
+    probabilityQuery: number
   ): CalculateMessage {
     return {
       type: "Calculate",
       payload: {
         diceIndex,
         input,
-        percentile_query,
-        probability_query,
+        percentileQuery,
+        probabilityQuery,
       },
     };
   }
@@ -83,7 +83,7 @@ export namespace WorkerMessages {
       [
         {
           diceIndex: DiceIndex;
-          probability_query: number;
+          probabilityQuery: number;
         }
       ]
     > {
@@ -93,7 +93,7 @@ export namespace WorkerMessages {
     indicesAndProbablities: [
       {
         diceIndex: DiceIndex;
-        probability_query: number;
+        probabilityQuery: number;
       }
     ]
   ): CalculateProbabilityMessage {
@@ -118,7 +118,7 @@ export namespace WorkerMessages {
       [
         {
           diceIndex: DiceIndex;
-          percentile_query: number;
+          percentileQuery: number;
         }
       ]
     > {
@@ -128,7 +128,7 @@ export namespace WorkerMessages {
     indicesAndPercentiles: [
       {
         diceIndex: DiceIndex;
-        percentile_query: number;
+        percentileQuery: number;
       }
     ]
   ): CalculatePerccentileMessage {

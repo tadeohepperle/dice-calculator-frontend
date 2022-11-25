@@ -11,7 +11,7 @@ export type JsDiceMaterialized = {
   variance: JsFractionMaterialized;
   distribution: any; // TODO
   cumulative_distribution: any; // TODO
-  probability_query: {
+  probabilityQuery: {
     query: number;
     result: {
       lt: JsFractionMaterialized;
@@ -21,7 +21,7 @@ export type JsDiceMaterialized = {
       gt: JsFractionMaterialized;
     };
   };
-  percentile_query: {
+  percentileQuery: {
     query: number;
     result: number;
   };

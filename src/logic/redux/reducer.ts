@@ -1,8 +1,18 @@
-import { configureStore, Reducer, Action } from "@reduxjs/toolkit";
+import {
+  configureStore,
+  Reducer,
+  Action,
+  createAsyncThunk,
+  MiddlewareAPI,
+  Middleware,
+} from "@reduxjs/toolkit";
 import { wasmComputeDice } from "../webworker/webworker_interface";
 import type { DiceIndex, JsDiceMaterialized } from "../data_types";
 import { Actions } from "./actions";
 import { AppState, DiceInputSegmentState, initialState } from "./state";
+import type { ToolkitStore } from "@reduxjs/toolkit/dist/configureStore";
+import { AsyncMiddleware } from "./middleware";
+import { wait } from "../utils";
 
 let ___: Actions.AppStateAction;
 const actionTypeFunctionMap: Record<
@@ -38,12 +48,17 @@ const rootReducer: Reducer<AppState, Actions.AppStateAction> = (
     : actionTypeFunctionMap[action.type](state, action);
 };
 
-export const store = configureStore({
+const asyncMiddleware: AsyncMiddleware = new AsyncMiddleware();
+const _store = configureStore({
   reducer: rootReducer,
-  //   preloadedState: initialState,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(asyncMiddleware.createMiddlewareFunction()),
 });
 
-export type RootState = ReturnType<typeof store.getState>;
+asyncMiddleware.store = _store;
+
+export const store = _store;
+export type RootState = ReturnType<typeof rootReducer>;
 export type AppDispatch = typeof store.dispatch;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -58,7 +73,7 @@ function changeInputReducer(
   let seg: DiceInputSegmentState = {
     ...state.inputSegments[payload.diceIndex]!,
     inputValue: payload.value,
-    calculationState: "newinput",
+    calculationState: { type: "newinput" },
   };
   let dice;
   let segs = { ...state.inputSegments, [diceIndex]: seg };
@@ -86,7 +101,7 @@ function addDiceReducer(
     let seg: DiceInputSegmentState = {
       diceIndex: numSegs,
       inputValue: "",
-      calculationState: "newinput",
+      calculationState: { type: "newinput" },
       rollManyNumber: 100,
     };
     return updateSegInState(state, numSegs, seg);
@@ -112,35 +127,36 @@ function calculateDistributionReducer(
   payload: Actions.CalculateDistributionPayload
 ): AppState {
   let input = state.inputSegments[payload.diceIndex]!.inputValue;
-
   const doCalculationsAndUpdateState = async (
     diceIndex: DiceIndex,
     input: string
   ) => {
     if (!input) {
-      store.dispatch(Actions.addErrorMessage(diceIndex, "Input is empty!"));
+      asyncMiddleware.dispatch(Actions.addErrorMessage(0, "Input is empty!"));
+      return;
     }
     try {
+      throw "errrrror 409";
       let dice: JsDiceMaterialized = await wasmComputeDice(
         diceIndex,
         input,
-        state.percentile_query,
-        state.probability_query
+        state.percentileQuery,
+        state.probabilityQuery
       );
-
+      // state.computedDices[diceIndex == ]
       // TODO
     } catch (ex) {
-      console.error(ex);
-      store.dispatch(
+      // await wait(0);
+      asyncMiddleware.dispatch(
         Actions.addErrorMessage(diceIndex, "Computation resulted in error")
       );
+      console.error(ex);
     }
   };
   doCalculationsAndUpdateState(payload.diceIndex, input);
-
   let seg: DiceInputSegmentState = {
     ...state.inputSegments[payload.diceIndex]!,
-    calculationState: "calculating",
+    calculationState: { type: "calculating" },
   };
   return updateSegInState(state, payload.diceIndex, seg);
 }
@@ -158,6 +174,7 @@ function addErrorMessageReducer(
     ...state.inputSegments[diceIndex]!,
     calculationState: { type: "error", message },
   };
+  console.log("errr");
   return updateSegInState(state, diceIndex, seg);
 }
 

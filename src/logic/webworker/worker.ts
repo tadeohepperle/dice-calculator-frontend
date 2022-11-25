@@ -1,6 +1,27 @@
 import { greet, JsDice, JsFraction } from "dices";
-import type { JsDiceMaterialized, JsFractionMaterialized } from "../data_types";
+import type {
+  DiceIndex,
+  JsDiceMaterialized,
+  JsFractionMaterialized,
+} from "../data_types";
 import type { WorkerMessages } from "./worker_messages";
+
+////////////////////////////////////////////////////////////////////////////////
+// KEEPING STATE
+////////////////////////////////////////////////////////////////////////////////
+
+const diceCache: Record<
+  DiceIndex,
+  [string, JsDice, JsDiceMaterialized] | undefined
+> = {
+  0: undefined,
+  1: undefined,
+  2: undefined,
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// EVENT HANDLING
+////////////////////////////////////////////////////////////////////////////////
 
 let messageResponseFunctionMap: Record<
   WorkerMessages.WorkerMessage["type"],
@@ -53,16 +74,36 @@ onmessage = function (e) {
 function calculateHandler(
   payload: WorkerMessages.CalculateMessage["payload"]
 ): WorkerMessages.CalculateResponse {
-  const { input, diceIndex, probability_query, percentile_query } = payload;
-  const dice = JsDice.build_from_string(input);
-  console.log(`built dice from ${input} and rolled ${dice.roll()}`);
+  const { input, diceIndex, probabilityQuery, percentileQuery } = payload;
+  // check cache:
+  for (const i of [0, 1, 2]) {
+    let cached = diceCache[i as DiceIndex];
+    if (cached) {
+      let [oldInput, dice, materialized] = cached!;
+      if (oldInput == input || dice.builder_string == input) {
+        // this is a hit!
+        diceCache[diceIndex] = [input, dice, materialized];
+        return {
+          type: "Calculate",
+          payload: materialized,
+        };
+      }
+    }
+  }
 
-  let diceMaterialized = materializeJsDice(
+  // construct the dice, potentially resource intensive and could take several seconds, for example for 3d2000
+  const dice = JsDice.build_from_string(input);
+  const materialized = materializeJsDice(
     dice,
-    probability_query,
-    percentile_query
+    probabilityQuery,
+    percentileQuery
   );
-  return { type: "Calculate", payload: diceMaterialized };
+  // cache it for future use.
+  diceCache[diceIndex] = [input, dice, materialized];
+  return {
+    type: "Calculate",
+    payload: materialized,
+  };
 }
 
 function rollHandler(
@@ -90,8 +131,8 @@ function calculatePercentileHandler(
 // because the getters on jsDice are functions and not fields and are therefore not sent to the other thread.
 function materializeJsDice(
   jsDice: JsDice,
-  probability_query: number,
-  percentile_query: number
+  probabilityQuery: number,
+  percentileQuery: number
 ): JsDiceMaterialized {
   // const jsDice = JsDice.build_from_string("2d6"); // REMOVE
 
@@ -101,7 +142,7 @@ function materializeJsDice(
     eq: JsFractionMaterialized;
     gte: JsFractionMaterialized;
     gt: JsFractionMaterialized;
-  } = jsDice.prob_all(BigInt(probability_query));
+  } = jsDice.prob_all(BigInt(probabilityQuery));
 
   const mode = Array(jsDice.mode.length)
     .fill(0)
@@ -119,12 +160,12 @@ function materializeJsDice(
     variance: materializeJsFraction(jsDice.variance),
     distribution: jsDice.distribution,
     cumulative_distribution: jsDice.cumulative_distribution,
-    probability_query: {
-      query: probability_query,
+    probabilityQuery: {
+      query: probabilityQuery,
       result: prob_all,
     },
-    percentile_query: {
-      query: percentile_query,
+    percentileQuery: {
+      query: percentileQuery,
       result: 7, // TODO
     },
   };

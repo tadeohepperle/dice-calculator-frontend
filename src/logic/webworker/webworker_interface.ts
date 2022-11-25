@@ -28,8 +28,8 @@ if (window.Worker) {
 export async function wasmComputeDice(
   diceIndex: DiceIndex,
   input: string,
-  percentile_query: number,
-  probability_query: number
+  percentileQuery: number,
+  probabilityQuery: number
 ): Promise<JsDiceMaterialized> {
   if (!worker) {
     throw "Cannot compute dice, because worker is not setup!";
@@ -37,14 +37,13 @@ export async function wasmComputeDice(
   let message = WorkerMessages.calculateMessage(
     diceIndex,
     input,
-    percentile_query,
-    probability_query
+    percentileQuery,
+    probabilityQuery
   );
   let { payload: diceMaterialized } = await postMessageAndAwaitResponse<
     WorkerMessages.CalculateMessage,
     WorkerMessages.CalculateResponse
   >(worker, message);
-  console.log(`Main recieved diceMaterialized:`, diceMaterialized);
   return diceMaterialized as JsDiceMaterialized;
 }
 

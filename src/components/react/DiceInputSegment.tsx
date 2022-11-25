@@ -21,6 +21,8 @@ const DiceInputSegment = (props: Props) => {
   });
   const dispatch = useDispatch();
 
+  const isError = calculationState;
+
   let color: UIColor = diceIndexToUiColor(props.diceIndex);
   return (
     <div className="mt-5 pb-2.5 relative">
@@ -53,19 +55,24 @@ const DiceInputSegment = (props: Props) => {
           ></IconButton>
         )}
       </div>
+      {calculationState.type == "error" && (
+        <div className="mt-3 ml-2">
+          <span className="text-red-500">{calculationState.message}</span>
+        </div>
+      )}
       <div className="flex flex-wrap">
         <IconButton
           className={"mt-5"}
           uiColor={color}
           title="Calculate Distribution"
           onClick={
-            calculationState == "newinput"
+            calculationState.type == "newinput"
               ? () => {
                   dispatch(Actions.calculateDistribution(diceIndex));
                 }
               : null
           }
-          loading={calculationState == "calculating"}
+          loading={calculationState.type == "calculating"}
           icon={Icons.calculator}
           grow="dominant"
         ></IconButton>
@@ -75,7 +82,7 @@ const DiceInputSegment = (props: Props) => {
           uiColor={color}
           title="Roll"
           onClick={
-            calculationState == "done"
+            calculationState.type == "done"
               ? () => {
                   dispatch(Actions.rollOne(diceIndex));
                 }
@@ -94,7 +101,7 @@ const DiceInputSegment = (props: Props) => {
             dispatch(Actions.changeRollManyNumber(diceIndex, n));
           }}
           onClick={
-            calculationState == "done"
+            calculationState.type == "done"
               ? () => {
                   dispatch(Actions.rollMany(diceIndex, rollManyNumber));
                 }

@@ -4,8 +4,8 @@ import type { DiceIndex } from "../data_types";
 export interface AbstractAppStateAction<T> extends Action<string> {
   type: string;
   payload: T;
-  error?: boolean;
-  meta?: any;
+  // error?: boolean;
+  // meta?: any;
 }
 
 export namespace Actions {
