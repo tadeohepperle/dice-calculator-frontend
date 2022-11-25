@@ -1,5 +1,6 @@
 import { greet, JsDice, JsFraction } from "dices";
-import type {
+import {
+  ALL_DICE_INDICES,
   DiceIndex,
   JsDiceMaterialized,
   JsFractionMaterialized,
@@ -76,8 +77,8 @@ function calculateHandler(
 ): WorkerMessages.CalculateResponse {
   const { input, diceIndex, probabilityQuery, percentileQuery } = payload;
   // check cache:
-  for (const i of [0, 1, 2]) {
-    let cached = diceCache[i as DiceIndex];
+  for (const i of ALL_DICE_INDICES) {
+    let cached = diceCache[i];
     if (cached) {
       let [oldInput, dice, materialized] = cached!;
       if (oldInput == input || dice.builder_string == input) {

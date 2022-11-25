@@ -1,4 +1,5 @@
 export type DiceIndex = 0 | 1 | 2;
+export const ALL_DICE_INDICES: [0, 1, 2] = [0, 1, 2];
 
 export type JsDiceMaterialized = {
   build_time: number;

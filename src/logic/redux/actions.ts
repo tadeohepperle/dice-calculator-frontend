@@ -1,5 +1,6 @@
-import type { Action } from "@reduxjs/toolkit";
+import type { Action, StateFromReducersMapObject } from "@reduxjs/toolkit";
 import type { DiceIndex } from "../data_types";
+import type { RootState } from "./reducer";
 
 export interface AbstractAppStateAction<T> extends Action<string> {
   type: string;
@@ -9,6 +10,37 @@ export interface AbstractAppStateAction<T> extends Action<string> {
 }
 
 export namespace Actions {
+  ////////////////////////////////////////////////////////////////////////////////
+  // ALL AVAILABLE ACTIONS
+  ////////////////////////////////////////////////////////////////////////////////
+  export type AppStateAction =
+    | ChangeInput
+    | DeleteDice
+    | AddDice
+    | CalculateDistribution
+    | Roll
+    | ChangeRollManyNumber
+    | AddErrorMessage
+    | RawReduction;
+
+  ////////////////////////////////////////////////////////////////////////////////
+  // ACTION DEFINITIONS
+  ////////////////////////////////////////////////////////////////////////////////
+
+  // sometimes you just want to dispatch an action that tells the reducer exactly how to transform the state.
+  export type RawReductionFunction = (state: RootState) => RootState;
+  export interface RawReduction
+    extends AbstractAppStateAction<RawReductionFunction> {
+    type: "RawReduction";
+  }
+  export function rawReduction(
+    reductionFunction: RawReductionFunction
+  ): RawReduction {
+    return { type: "RawReduction", payload: reductionFunction };
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+
   export interface ChangeInputPayload {
     value: string;
     diceIndex: DiceIndex;
@@ -23,6 +55,8 @@ export namespace Actions {
   ): ChangeInput {
     return { type: "ChangeInput", payload: { diceIndex, value } };
   }
+
+  ////////////////////////////////////////////////////////////////////////////////
 
   export interface ChangeRollManyNumberPayload {
     value: number;
@@ -39,6 +73,8 @@ export namespace Actions {
     return { type: "ChangeRollManyNumber", payload: { diceIndex, value } };
   }
 
+  ////////////////////////////////////////////////////////////////////////////////
+
   export interface CalculateDistributionPayload {
     diceIndex: DiceIndex;
   }
@@ -51,6 +87,8 @@ export namespace Actions {
   ): CalculateDistribution {
     return { type: "CalculateDistribution", payload: { diceIndex } };
   }
+
+  ////////////////////////////////////////////////////////////////////////////////
 
   export interface RollPayload {
     diceIndex: DiceIndex;
@@ -69,6 +107,8 @@ export namespace Actions {
     };
   }
 
+  ////////////////////////////////////////////////////////////////////////////////
+
   export interface DeleteDicePayload {
     diceIndex: DiceIndex;
   }
@@ -82,6 +122,8 @@ export namespace Actions {
     return { type: "DeleteDice", payload: { diceIndex } };
   }
 
+  ////////////////////////////////////////////////////////////////////////////////
+
   export interface AddDicePayload {}
   export interface AddDice extends AbstractAppStateAction<{}> {
     type: "AddDice";
@@ -89,6 +131,8 @@ export namespace Actions {
   export function addDice(): AddDice {
     return { type: "AddDice", payload: {} };
   }
+
+  ////////////////////////////////////////////////////////////////////////////////
 
   export interface AddErrorMessagePayload {
     diceIndex: DiceIndex;
@@ -104,12 +148,5 @@ export namespace Actions {
     return { type: "AddErrorMessage", payload: { diceIndex, message } };
   }
 
-  export type AppStateAction =
-    | ChangeInput
-    | DeleteDice
-    | AddDice
-    | CalculateDistribution
-    | Roll
-    | ChangeRollManyNumber
-    | AddErrorMessage;
+  ////////////////////////////////////////////////////////////////////////////////
 }

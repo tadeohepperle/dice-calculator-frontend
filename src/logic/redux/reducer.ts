@@ -9,9 +9,14 @@ import {
 import { wasmComputeDice } from "../webworker/webworker_interface";
 import type { DiceIndex, JsDiceMaterialized } from "../data_types";
 import { Actions } from "./actions";
-import { AppState, DiceInputSegmentState, initialState } from "./state";
+import {
+  AppState,
+  CalculationState,
+  DiceInputSegmentState,
+  initialState,
+} from "./state";
 import type { ToolkitStore } from "@reduxjs/toolkit/dist/configureStore";
-import { AsyncMiddleware } from "./middleware";
+import { SafeDispatchInRecuderMiddleware } from "./middleware";
 import { wait } from "../utils";
 
 let ___: Actions.AppStateAction;
@@ -19,6 +24,7 @@ const actionTypeFunctionMap: Record<
   typeof ___.type,
   (state: AppState, action: Actions.AppStateAction) => AppState
 > = {
+  RawReduction: (s, a) => (a as Actions.RawReduction).payload(s),
   ChangeInput: (s, a) =>
     changeInputReducer(s, a.payload as Actions.ChangeInputPayload),
   DeleteDice: (s, a) =>
@@ -48,14 +54,17 @@ const rootReducer: Reducer<AppState, Actions.AppStateAction> = (
     : actionTypeFunctionMap[action.type](state, action);
 };
 
-const asyncMiddleware: AsyncMiddleware = new AsyncMiddleware();
+const safeDispatchMiddleware: SafeDispatchInRecuderMiddleware =
+  new SafeDispatchInRecuderMiddleware();
 const _store = configureStore({
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(asyncMiddleware.createMiddlewareFunction()),
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }).concat(safeDispatchMiddleware.createMiddlewareFunction()),
 });
 
-asyncMiddleware.store = _store;
+safeDispatchMiddleware.store = _store;
 
 export const store = _store;
 export type RootState = ReturnType<typeof rootReducer>;
@@ -127,33 +136,35 @@ function calculateDistributionReducer(
   payload: Actions.CalculateDistributionPayload
 ): AppState {
   let input = state.inputSegments[payload.diceIndex]!.inputValue;
-  const doCalculationsAndUpdateState = async (
-    diceIndex: DiceIndex,
-    input: string
-  ) => {
+  (async (diceIndex: DiceIndex, input: string) => {
     if (!input) {
-      asyncMiddleware.dispatch(Actions.addErrorMessage(0, "Input is empty!"));
+      safeDispatchMiddleware.dispatch(
+        Actions.addErrorMessage(0, "Input is empty!")
+      );
       return;
     }
     try {
-      throw "errrrror 409";
       let dice: JsDiceMaterialized = await wasmComputeDice(
         diceIndex,
         input,
         state.percentileQuery,
         state.probabilityQuery
       );
-      // state.computedDices[diceIndex == ]
-      // TODO
+      const reduction = (s: RootState): RootState => {
+        let newState = updateCalculationStateInState(state, diceIndex, {
+          type: "done",
+        });
+        return updateComputedDiceInState(newState, diceIndex, dice);
+      };
+      safeDispatchMiddleware.dispatch(Actions.rawReduction(reduction));
     } catch (ex) {
-      // await wait(0);
-      asyncMiddleware.dispatch(
+      safeDispatchMiddleware.dispatch(
         Actions.addErrorMessage(diceIndex, "Computation resulted in error")
       );
       console.error(ex);
     }
-  };
-  doCalculationsAndUpdateState(payload.diceIndex, input);
+  })(payload.diceIndex, input);
+
   let seg: DiceInputSegmentState = {
     ...state.inputSegments[payload.diceIndex]!,
     calculationState: { type: "calculating" },
@@ -181,6 +192,29 @@ function addErrorMessageReducer(
 ////////////////////////////////////////////////////////////////////////////////
 // functions
 ////////////////////////////////////////////////////////////////////////////////
+
+function updateCalculationStateInState(
+  state: AppState,
+  diceIndex: DiceIndex,
+  calculationState: CalculationState
+): AppState {
+  let seg: DiceInputSegmentState = {
+    ...state.inputSegments[diceIndex]!,
+    calculationState: calculationState,
+  };
+  return updateSegInState(state, diceIndex, seg);
+}
+
+function updateComputedDiceInState(
+  state: AppState,
+  diceIndex: DiceIndex,
+  dice: JsDiceMaterialized
+): AppState {
+  return {
+    ...state,
+    computedDices: { ...state.computedDices, [diceIndex]: dice },
+  };
+}
 
 function updateSegInState(
   state: AppState,

@@ -3,7 +3,7 @@ import type { ToolkitStore } from "@reduxjs/toolkit/dist/configureStore";
 import type { Actions } from "./actions";
 import type { RootState, store } from "./reducer";
 
-export class AsyncMiddleware {
+export class SafeDispatchInRecuderMiddleware {
   actionQueue: Actions.AppStateAction[];
 
   store: ToolkitStore | undefined;

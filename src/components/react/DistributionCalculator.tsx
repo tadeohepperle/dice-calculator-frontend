@@ -1,25 +1,37 @@
 import { Provider, useDispatch, useSelector } from "react-redux";
-import type { DiceIndex } from "../../logic/data_types";
+import { ALL_DICE_INDICES, DiceIndex } from "../../logic/data_types";
 import { Actions } from "../../logic/redux/actions";
 import type { AppState, CalculationState } from "../../logic/redux/state";
 import DiceInputSegment from "./DiceInputSegment";
+import DicePlotDisplay from "./DicePlotDisplay";
+import DicePlot from "./DicePlotDisplay";
+import DiceStatsDisplay from "./DiceStatsDisplay";
 import IconButton from "./IconButton";
 import InputField from "./InputField";
 
 import { UIColor, Icons } from "./ui";
 
 const DistributionCalculator = () => {
-  const segmentStates: {
-    diceIndex: DiceIndex;
-    calculationState: CalculationState;
-  }[] = useSelector((state: AppState) => {
-    return [0, 1, 2]
-      .map((i) => state.inputSegments[i as DiceIndex])
+  const [segmentStates, atLeastOneDiceCalculated]: [
+    {
+      diceIndex: DiceIndex;
+      calculationState: CalculationState;
+    }[],
+    boolean
+  ] = useSelector((state: AppState) => {
+    const segmentStates: {
+      diceIndex: DiceIndex;
+      calculationState: CalculationState;
+    }[] = ALL_DICE_INDICES.map((i) => state.inputSegments[i])
       .filter((e) => e !== undefined)
       .map((e) => {
         const { diceIndex, calculationState } = e!;
         return { diceIndex, calculationState };
       });
+    const atLeastOneDiceCalculated = ALL_DICE_INDICES.some(
+      (i) => state.computedDices[i]
+    );
+    return [segmentStates, atLeastOneDiceCalculated];
   });
   const dispatch = useDispatch();
   return (
@@ -43,6 +55,12 @@ const DistributionCalculator = () => {
           }}
           grow="none"
         ></IconButton>
+      )}
+      {atLeastOneDiceCalculated && (
+        <div>
+          <DicePlotDisplay></DicePlotDisplay>
+          <DiceStatsDisplay></DiceStatsDisplay>
+        </div>
       )}
     </div>
   );
