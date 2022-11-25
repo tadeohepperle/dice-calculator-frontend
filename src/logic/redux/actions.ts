@@ -149,12 +149,12 @@ export namespace Actions {
 
   ////////////////////////////////////////////////////////////////////////////////
 
-  export type ChangePercentileQueryPayload = number;
+  export type ChangePercentileQueryPayload = string;
   export interface ChangePercentileQuery
     extends AbstractAppStateAction<ChangePercentileQueryPayload> {
     type: "ChangePercentileQuery";
   }
-  export function changePercentileQuery(input: number): ChangePercentileQuery {
+  export function changePercentileQuery(input: string): ChangePercentileQuery {
     return { type: "ChangePercentileQuery", payload: input };
   }
   ////////////////////////////////////////////////////////////////////////////////

@@ -12,7 +12,6 @@ const InputField = (props: Props) => {
       <input
         onChange={(e) => props.onChange(e.target.value)}
         type="text"
-        id="first_name"
         className="
         input-shadow
         appearance-none 

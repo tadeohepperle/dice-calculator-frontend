@@ -21,7 +21,7 @@ export type JsDiceMaterialized = {
   };
   percentileQuery: {
     query: number | undefined;
-    result: number | undefined; // stands for loading
+    result: bigint | undefined; // stands for loading
   };
 };
 
@@ -63,6 +63,11 @@ export function materializeJsDice(
       ? undefined
       : convertProbAll(jsDice.prob_all(BigInt(probabilityQuery)));
 
+  let percentile =
+    percentileQuery === undefined
+      ? undefined
+      : jsDice.quantile(percentileQuery / 100);
+
   const mode = Array(jsDice.mode.length)
     .fill(0)
     .map((e, i) => jsDice.mode[i]);
@@ -86,7 +91,7 @@ export function materializeJsDice(
     },
     percentileQuery: {
       query: percentileQuery,
-      result: 7, // TODO
+      result: percentile, // TODO
     },
   };
 }

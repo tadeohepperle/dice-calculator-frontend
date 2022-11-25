@@ -7,6 +7,7 @@ import {
 } from "../../logic/data_types";
 import { Actions } from "../../logic/redux/actions";
 import type { AppState } from "../../logic/redux/state";
+import LoadingSpinner from "./utility/LoadingSpinner";
 
 export interface Props {}
 
@@ -70,36 +71,37 @@ const DiceStatsDisplay = (props: Props) => {
               <div className="flex">
                 Probability
                 <input
-                  onChange={(e) => {
-                    try {
-                      dispatch(Actions.changeProbabilityQuery(e.target.value));
-                    } catch (ex) {
-                      console.log(ex); // should never happen
-                    }
-                  }}
+                  onChange={(e) =>
+                    dispatch(Actions.changeProbabilityQuery(e.target.value))
+                  }
                   type="number"
-                  id="first_name"
-                  className="
-                  w-16 pr-1 pl-3 py-1 ring-0
-        ml-2 text-sm
-        input-shadow
-        appearance-none 
-        leading-tight
-        bg-slate-900 font-bold
-        transition-all
-         text-white rounded-lg block"
+                  className="w-16 pr-1 pl-3 py-1 ring-0 ml-2 text-sm input-shadow appearance-none leading-tight bg-slate-900 font-bold transition-all  text-white rounded-lg block"
                   inputMode="numeric"
                   value={probabilityQuery}
                 />
               </div>
             </th>
             {createCellsFromDices(computedDices, (d) => {
-              const result = d.probabilityQuery.result;
-              if (result === undefined) {
-                return "loading";
-              } else {
-                return result[comparatorMode].string;
-              }
+              return d.probabilityQuery.result?.[comparatorMode]?.string;
+            })}
+          </tr>
+          <tr>
+            <th>
+              <div className="flex">
+                Percentile
+                <input
+                  onChange={(e) =>
+                    dispatch(Actions.changePercentileQuery(e.target.value))
+                  }
+                  type="number"
+                  className="w-16 pr-1 pl-3 py-1 ring-0 ml-2 text-sm input-shadow appearance-none leading-tight bg-slate-900 font-bold transition-all  text-white rounded-lg block"
+                  inputMode="decimal"
+                  value={percentileQuery}
+                />
+              </div>
+            </th>
+            {createCellsFromDices(computedDices, (d) => {
+              return d.percentileQuery.result?.toString();
             })}
           </tr>
         </tbody>
@@ -110,17 +112,28 @@ const DiceStatsDisplay = (props: Props) => {
 
 export default DiceStatsDisplay;
 
+// the appear-late class on the loading spinner is added to remove flicker in case of very fast updates < 70ms.
 const createCellsFromDices = (
   dices: Record<DiceIndex, JsDiceMaterialized | undefined>,
-  displayFunction: (dice: JsDiceMaterialized) => string
+  displayFunction: (dice: JsDiceMaterialized) => string | undefined
 ) =>
   ALL_DICE_INDICES.map((i) => dices[i]).map((e, i) =>
-    e === undefined ? <td key={i}></td> : <td key={i}>{displayFunction(e)}</td>
+    e === undefined ? (
+      <td key={i}></td>
+    ) : (
+      <td key={i}>
+        {displayFunction(e) || (
+          <div className="appear-later">
+            <LoadingSpinner className="text-slate-900 fill-gray-300"></LoadingSpinner>
+          </div>
+        )}
+      </td>
+    )
   );
 
 const createHeaderCellsFromDices = (
   dices: Record<DiceIndex, JsDiceMaterialized | undefined>,
-  displayFunction: (dice: JsDiceMaterialized) => string
+  displayFunction: (dice: JsDiceMaterialized) => string | undefined
 ) =>
   ALL_DICE_INDICES.map((i) => dices[i]).map((e, i) =>
     e === undefined ? <th key={i}></th> : <th key={i}>{displayFunction(e)}</th>

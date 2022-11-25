@@ -34,3 +34,18 @@
   box-shadow: inset -2px 4px 8px 0px rgba(0, 0, 0, 0.39),
     0 5px 5px rgba(0, 0, 0, 0.25);
 }
+
+.appear-later {
+  opacity: 0;
+  animation: appear 300ms ease-in-out 70ms;
+  animation-fill-mode: forwards;
+}
+
+@keyframes appear {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

@@ -138,13 +138,25 @@ function calculateProbabilityHandler(
     type: "CalculateProbability",
     payload: returnvalues,
   };
-  throw "not implemented";
 }
 
 function calculatePercentileHandler(
   payload: WorkerMessages.CalculatePerccentileMessage["payload"]
 ): WorkerMessages.CalculatePerccentileResponse {
-  throw "not implemented";
+  let returnvalues: {
+    diceIndex: DiceIndex;
+    percentile: bigint | undefined;
+  }[] = payload.map((p) => {
+    const { diceIndex, percentileQuery } = p;
+    let dice = diceCache[diceIndex]?.[1];
+    if (!dice) {
+      return { diceIndex, percentile: undefined };
+    } else {
+      let percentile = dice.quantile(percentileQuery / 100);
+      return { diceIndex, percentile };
+    }
+  });
+  return { type: "CalculatePercentile", payload: returnvalues };
 }
 
 ////////////////////////////////////////////////////////////////////////////////

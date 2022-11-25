@@ -3,6 +3,7 @@ import type { DiceIndex, JsDiceMaterialized } from "../data_types";
 import { WorkerMessages } from "./worker_messages";
 
 import Worker from "./worker.ts?worker";
+import { wait } from "../utils";
 
 ////////////////////////////////////////////////////////////////////////////////
 // SETUP WEB WORKER
@@ -64,6 +65,22 @@ export async function wasmComputeProbabilities(
   return payload;
 }
 
+export async function wasmComputePercentiles(
+  percentileQuery: number
+): Promise<WorkerMessages.CalculatePerccentileResponse["payload"]> {
+  ensureWorkerIsPresent();
+  let message = WorkerMessages.calculatePerccentileMessage([
+    { diceIndex: 0, percentileQuery },
+    { diceIndex: 1, percentileQuery },
+    { diceIndex: 2, percentileQuery },
+  ]);
+  let { payload } = await postMessageAndAwaitResponse<
+    WorkerMessages.CalculatePerccentileMessage,
+    WorkerMessages.CalculatePerccentileResponse
+  >(worker!, message);
+
+  return payload;
+}
 ////////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////

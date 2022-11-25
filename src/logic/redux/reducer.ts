@@ -8,6 +8,7 @@ import {
 } from "@reduxjs/toolkit";
 import {
   wasmComputeDice,
+  wasmComputePercentiles,
   wasmComputeProbabilities,
 } from "../webworker/webworker_interface";
 import { ALL_DICE_INDICES, DiceIndex, JsDiceMaterialized } from "../data_types";
@@ -52,7 +53,10 @@ const actionTypeFunctionMap: Record<
       a.payload as Actions.ChangeProbabilityQueryPayload
     ),
   ChangePercentileQuery: (s, a) =>
-    changePercentileQueryReducer(s, a.payload as Actions.ChangePercentileQuery),
+    changePercentileQueryReducer(
+      s,
+      a.payload as Actions.ChangePercentileQueryPayload
+    ),
 };
 
 const rootReducer: Reducer<AppState, Actions.AppStateAction> = (
@@ -212,13 +216,12 @@ function addErrorMessageReducer(
 
 function changeProbabilityQueryReducer(
   state: AppState,
-  query: string
+  query: Actions.ChangeProbabilityQueryPayload
 ): AppState {
   let queryNum: number = parseInt(query);
   if (isNaN(queryNum)) {
     return { ...state, probabilityQuery: query };
   }
-
   (async (parsed: number) => {
     try {
       let result = await wasmComputeProbabilities(parsed);
@@ -232,9 +235,8 @@ function changeProbabilityQueryReducer(
       safeDispatchMiddleware.dispatch(Actions.rawReduction(reduction));
     } catch (ex) {
       console.error(ex);
-      // TODO
+      // TODO: idk maybe an error state for percentiles and probabilities???
     }
-    // safeDispatchMiddleware.dispatch();
   })(queryNum);
   return applyProbabilityQueriesToDicesInState(
     state,
@@ -245,9 +247,33 @@ function changeProbabilityQueryReducer(
 
 function changePercentileQueryReducer(
   state: AppState,
-  n: Actions.ChangePercentileQuery
+  query: Actions.ChangePercentileQueryPayload
 ): AppState {
-  throw new Error("Function not implemented.");
+  let queryNum: number = parseFloat(query);
+  if (isNaN(queryNum)) {
+    return { ...state, percentileQuery: query };
+  }
+  (async (parsed: number) => {
+    try {
+      let result = await wasmComputePercentiles(parsed);
+      const reduction = (state: AppState): AppState => {
+        return applyPercentileQueriesToDicesInState(
+          state,
+          result.map((e) => e.percentile),
+          parsed
+        );
+      };
+      safeDispatchMiddleware.dispatch(Actions.rawReduction(reduction));
+    } catch (ex) {
+      console.error(ex);
+      // TODO: idk maybe an error state for percentiles and probabilities???
+    }
+  })(queryNum);
+  return applyPercentileQueriesToDicesInState(
+    state,
+    [undefined, undefined, undefined],
+    queryNum
+  );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -311,5 +337,31 @@ function applyProbabilityQueriesToDicesInState(
     ...state,
     computedDices: newComputedDices,
     probabilityQuery: query.toString(),
+  };
+}
+
+function applyPercentileQueriesToDicesInState(
+  state: AppState,
+  results: JsDiceMaterialized["percentileQuery"]["result"][],
+  query: number
+): AppState {
+  let newComputedDicesArr: (JsDiceMaterialized | undefined)[] =
+    ALL_DICE_INDICES.map((i) => {
+      return state.computedDices[i] === undefined
+        ? undefined
+        : {
+            ...state.computedDices[i]!,
+            percentileQuery: { result: results[i], query: query },
+          };
+    });
+  let newComputedDices = {
+    0: newComputedDicesArr[0],
+    1: newComputedDicesArr[1],
+    2: newComputedDicesArr[2],
+  };
+  return {
+    ...state,
+    computedDices: newComputedDices,
+    percentileQuery: query.toString(),
   };
 }

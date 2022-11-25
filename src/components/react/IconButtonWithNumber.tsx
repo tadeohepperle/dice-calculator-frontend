@@ -72,7 +72,6 @@ const IconButtonWithNumber = (props: Props) => {
           }
         }}
         type="number"
-        id="first_name"
         className="
         ml-2 text-sm
         input-shadow

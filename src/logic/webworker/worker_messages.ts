@@ -131,7 +131,7 @@ export namespace WorkerMessages {
   export type CalculatePerccentileResponse = AbstractWorkerResponse<
     {
       diceIndex: DiceIndex;
-      percentile: number;
+      percentile: bigint | undefined;
     }[],
     "CalculatePercentile"
   >;
