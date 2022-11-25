@@ -1,4 +1,4 @@
-import type { JsDice } from "dices";
+import { JsDice } from "dices";
 import type { DiceIndex, JsDiceMaterialized } from "../data_types";
 import { WorkerMessages } from "./worker_messages";
 

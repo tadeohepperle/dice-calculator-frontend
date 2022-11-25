@@ -4,6 +4,7 @@ import {
   DiceIndex,
   JsDiceMaterialized,
   JsFractionMaterialized,
+  materializeJsDice,
 } from "../data_types";
 import type { WorkerMessages } from "./worker_messages";
 
@@ -128,59 +129,6 @@ function calculatePercentileHandler(
 ////////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
-
-// because the getters on jsDice are functions and not fields and are therefore not sent to the other thread.
-function materializeJsDice(
-  jsDice: JsDice,
-  probabilityQuery: number,
-  percentileQuery: number
-): JsDiceMaterialized {
-  // const jsDice = JsDice.build_from_string("2d6"); // REMOVE
-
-  let prob_all: {
-    lt: JsFractionMaterialized;
-    lte: JsFractionMaterialized;
-    eq: JsFractionMaterialized;
-    gte: JsFractionMaterialized;
-    gt: JsFractionMaterialized;
-  } = jsDice.prob_all(BigInt(probabilityQuery));
-
-  const mode = Array(jsDice.mode.length)
-    .fill(0)
-    .map((e, i) => jsDice.mode[i]);
-
-  // TODO: cumulative_distribution
-  return {
-    build_time: Number(jsDice.build_time),
-    builder_string: jsDice.builder_string,
-    min: jsDice.min,
-    max: jsDice.max,
-    mode,
-    median: jsDice.median,
-    mean: materializeJsFraction(jsDice.mean),
-    variance: materializeJsFraction(jsDice.variance),
-    distribution: jsDice.distribution,
-    cumulative_distribution: jsDice.cumulative_distribution,
-    probabilityQuery: {
-      query: probabilityQuery,
-      result: prob_all,
-    },
-    percentileQuery: {
-      query: percentileQuery,
-      result: 7, // TODO
-    },
-  };
-}
-
-// because the getters on jsFraction are functions and not fields and are therefore not sent to the other thread.
-function materializeJsFraction(jsFraction: JsFraction) {
-  return {
-    numer: jsFraction.numer,
-    denom: jsFraction.denom,
-    negative: jsFraction.negative,
-    float: jsFraction.float,
-  };
-}
 
 function postFail(id: number, message: any) {
   self.postMessage({ failed: true, id, message });

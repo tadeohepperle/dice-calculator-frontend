@@ -8,7 +8,6 @@ const DicePlotDisplay = (props: Props) => {
   const computedDices = useSelector((state: AppState) => {
     return state.computedDices;
   });
-  console.log(computedDices);
 
   return (
     <div>
