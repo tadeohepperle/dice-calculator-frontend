@@ -6,8 +6,11 @@ import {
   MiddlewareAPI,
   Middleware,
 } from "@reduxjs/toolkit";
-import { wasmComputeDice } from "../webworker/webworker_interface";
-import type { DiceIndex, JsDiceMaterialized } from "../data_types";
+import {
+  wasmComputeDice,
+  wasmComputeProbabilities,
+} from "../webworker/webworker_interface";
+import { ALL_DICE_INDICES, DiceIndex, JsDiceMaterialized } from "../data_types";
 import { Actions } from "./actions";
 import {
   AppState,
@@ -43,6 +46,13 @@ const actionTypeFunctionMap: Record<
   Roll: (s, a) => rollReducer(s, a.payload as Actions.RollPayload),
   AddErrorMessage: (s, a) =>
     addErrorMessageReducer(s, a.payload as Actions.AddErrorMessagePayload),
+  ChangeProbabilityQuery: (s, a) =>
+    changeProbabilityQueryReducer(
+      s,
+      a.payload as Actions.ChangeProbabilityQueryPayload
+    ),
+  ChangePercentileQuery: (s, a) =>
+    changePercentileQueryReducer(s, a.payload as Actions.ChangePercentileQuery),
 };
 
 const rootReducer: Reducer<AppState, Actions.AppStateAction> = (
@@ -84,9 +94,7 @@ function changeInputReducer(
     inputValue: payload.value,
     calculationState: { type: "newinput" },
   };
-  let dice;
-  let segs = { ...state.inputSegments, [diceIndex]: seg };
-  return { ...state, inputSegments: segs };
+  return updateSegInState(state, diceIndex, seg);
 }
 
 function deleteDiceReducer(
@@ -95,25 +103,39 @@ function deleteDiceReducer(
 ): AppState {
   const { diceIndex } = payload;
   let segs = { ...state.inputSegments, [diceIndex]: undefined };
-  return { ...state, inputSegments: segs };
+  let dices = { ...state.computedDices, [diceIndex]: undefined };
+  return {
+    ...state,
+    inputSegments: segs,
+    computedDices: dices,
+    segmentDisplayOrder: state.segmentDisplayOrder.filter(
+      (e) => e !== diceIndex
+    ),
+  };
 }
 
 function addDiceReducer(
   state: AppState,
   payload: Actions.AddDicePayload
 ): AppState {
-  let numSegs: DiceIndex = (1 +
-    (state.inputSegments[1] ? 1 : 0) +
-    (state.inputSegments[2] ? 1 : 0)) as DiceIndex;
+  let segs0or1: number[] = ALL_DICE_INDICES.map((i) =>
+    state.inputSegments[i] ? 1 : 0
+  );
+  let count = segs0or1.reduce((a, c) => a + c, 0);
 
-  if (numSegs < 3) {
+  if (count < 3) {
+    // find first one to update:
+    let firstFreeIndex = segs0or1.findIndex((e) => e == 0) as DiceIndex;
+
     let seg: DiceInputSegmentState = {
-      diceIndex: numSegs,
+      diceIndex: firstFreeIndex,
       inputValue: "",
-      calculationState: { type: "newinput" },
+      calculationState: { type: "error", message: "" },
       rollManyNumber: 100,
     };
-    return updateSegInState(state, numSegs, seg);
+    let newState = updateSegInState(state, firstFreeIndex, seg);
+    let newOrder = [...newState.segmentDisplayOrder, firstFreeIndex];
+    return { ...newState, segmentDisplayOrder: newOrder };
   } else {
     return state;
   }
@@ -138,17 +160,18 @@ function calculateDistributionReducer(
   let input = state.inputSegments[payload.diceIndex]!.inputValue;
   (async (diceIndex: DiceIndex, input: string) => {
     if (!input) {
-      safeDispatchMiddleware.dispatch(
-        Actions.addErrorMessage(0, "Input is empty!")
+      return safeDispatchMiddleware.dispatch(
+        Actions.addErrorMessage(diceIndex, "Input is empty!")
       );
-      return;
     }
     try {
+      let percentileQueryNum = parseInt(state.percentileQuery);
+      let probabilityQueryNum = parseInt(state.probabilityQuery);
       let dice: JsDiceMaterialized = await wasmComputeDice(
         diceIndex,
         input,
-        state.percentileQuery,
-        state.probabilityQuery
+        isNaN(percentileQueryNum) ? undefined : percentileQueryNum,
+        isNaN(probabilityQueryNum) ? undefined : probabilityQueryNum
       );
       const reduction = (s: RootState): RootState => {
         let newState = updateCalculationStateInState(state, diceIndex, {
@@ -158,10 +181,9 @@ function calculateDistributionReducer(
       };
       safeDispatchMiddleware.dispatch(Actions.rawReduction(reduction));
     } catch (ex) {
-      safeDispatchMiddleware.dispatch(
+      return safeDispatchMiddleware.dispatch(
         Actions.addErrorMessage(diceIndex, "Computation resulted in error")
       );
-      console.error(ex);
     }
   })(payload.diceIndex, input);
 
@@ -185,12 +207,51 @@ function addErrorMessageReducer(
     ...state.inputSegments[diceIndex]!,
     calculationState: { type: "error", message },
   };
-  console.log("errr");
   return updateSegInState(state, diceIndex, seg);
 }
 
+function changeProbabilityQueryReducer(
+  state: AppState,
+  query: string
+): AppState {
+  let queryNum: number = parseInt(query);
+  if (isNaN(queryNum)) {
+    return { ...state, probabilityQuery: query };
+  }
+
+  (async (parsed: number) => {
+    try {
+      let result = await wasmComputeProbabilities(parsed);
+      const reduction = (state: AppState): AppState => {
+        return applyProbabilityQueriesToDicesInState(
+          state,
+          result.map((e) => e.probability),
+          parsed
+        );
+      };
+      safeDispatchMiddleware.dispatch(Actions.rawReduction(reduction));
+    } catch (ex) {
+      console.error(ex);
+      // TODO
+    }
+    // safeDispatchMiddleware.dispatch();
+  })(queryNum);
+  return applyProbabilityQueriesToDicesInState(
+    state,
+    [undefined, undefined, undefined],
+    queryNum
+  );
+}
+
+function changePercentileQueryReducer(
+  state: AppState,
+  n: Actions.ChangePercentileQuery
+): AppState {
+  throw new Error("Function not implemented.");
+}
+
 ////////////////////////////////////////////////////////////////////////////////
-// functions
+// FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
 function updateCalculationStateInState(
@@ -224,5 +285,31 @@ function updateSegInState(
   return {
     ...state,
     inputSegments: { ...state.inputSegments, [diceIndex]: seg },
+  };
+}
+
+function applyProbabilityQueriesToDicesInState(
+  state: AppState,
+  results: JsDiceMaterialized["probabilityQuery"]["result"][],
+  query: number
+): AppState {
+  let newComputedDicesArr: (JsDiceMaterialized | undefined)[] =
+    ALL_DICE_INDICES.map((i) => {
+      return state.computedDices[i] === undefined
+        ? undefined
+        : {
+            ...state.computedDices[i]!,
+            probabilityQuery: { result: results[i], query: query },
+          };
+    });
+  let newComputedDices = {
+    0: newComputedDicesArr[0],
+    1: newComputedDicesArr[1],
+    2: newComputedDicesArr[2],
+  };
+  return {
+    ...state,
+    computedDices: newComputedDices,
+    probabilityQuery: query.toString(),
   };
 }

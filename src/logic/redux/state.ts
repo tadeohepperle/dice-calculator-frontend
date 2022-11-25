@@ -1,4 +1,10 @@
-import type { DiceIndex, JsDiceMaterialized, RollResult } from "../data_types";
+import {
+  ALL_DICE_INDICES,
+  DiceIndex,
+  JsDiceMaterialized,
+  RollResult,
+} from "../data_types";
+import type { RootState } from "./reducer";
 
 export type CalculationState =
   | { type: "newinput" }
@@ -19,18 +25,20 @@ export interface DiceInputSegmentState {
 export type ProbabilityQueryMode = "lt" | "lte" | "eq" | "gte" | "gt";
 
 export interface AppState {
+  segmentDisplayOrder: DiceIndex[];
   inputSegments: {
-    0: DiceInputSegmentState;
+    0?: DiceInputSegmentState;
     1?: DiceInputSegmentState;
     2?: DiceInputSegmentState;
   };
   computedDices: Record<DiceIndex, JsDiceMaterialized | undefined>;
-  probabilityQuery: number;
+  probabilityQuery: string;
   probabilityQueryMode: ProbabilityQueryMode;
-  percentileQuery: number;
+  percentileQuery: string;
 }
 
 export const initialState: AppState = {
+  segmentDisplayOrder: [0],
   inputSegments: {
     0: {
       diceIndex: 0,
@@ -40,7 +48,16 @@ export const initialState: AppState = {
     },
   },
   computedDices: { 0: undefined, 1: undefined, 2: undefined },
-  percentileQuery: 90,
-  probabilityQuery: 6,
+  percentileQuery: "90",
+  probabilityQuery: "6",
   probabilityQueryMode: "lte",
 };
+
+////////////////////////////////////////////////////////////////////////////////
+// FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////
+
+export const numberOfInputSegments = (state: AppState): number =>
+  ALL_DICE_INDICES.map((i) =>
+    state.inputSegments[i] !== undefined ? (1 as number) : 0
+  ).reduce((a, c) => a + c, 0);

@@ -5,7 +5,8 @@ export const ALL_DICE_INDICES: [0, 1, 2] = [0, 1, 2];
 
 export type JsDiceMaterialized = {
   build_time: number;
-  builder_string: string;
+  builder_string: string; // created from dice_builder object
+  original_builder_string: string; // real one from input
   min: bigint;
   max: bigint;
   mode: bigint[];
@@ -15,19 +16,21 @@ export type JsDiceMaterialized = {
   distribution: any; // TODO
   cumulative_distribution: any; // TODO
   probabilityQuery: {
-    query: number;
-    result: {
-      lt: JsFractionMaterialized;
-      lte: JsFractionMaterialized;
-      eq: JsFractionMaterialized;
-      gte: JsFractionMaterialized;
-      gt: JsFractionMaterialized;
-    };
+    query: number | undefined;
+    result: ProbAll | undefined; // stands for loading
   };
   percentileQuery: {
-    query: number;
-    result: number;
+    query: number | undefined;
+    result: number | undefined; // stands for loading
   };
+};
+
+export type ProbAll = {
+  lt: JsFractionMaterialized;
+  lte: JsFractionMaterialized;
+  eq: JsFractionMaterialized;
+  gte: JsFractionMaterialized;
+  gt: JsFractionMaterialized;
 };
 
 export type DiceOperationQuery = { type: "prob"; value: number };
@@ -43,24 +46,22 @@ export type RollResult =
   | { type: "many"; numbers: number[] };
 
 ////////////////////////////////////////////////////////////////////////////////
-// functions
+// FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
 
-// because the getters on jsDice are functions and not fields and are therefore not sent to the other thread.
+// because the getters on JsDice are functions and not fields and are therefore not sent to the other thread.
 export function materializeJsDice(
   jsDice: JsDice,
-  probabilityQuery: number,
-  percentileQuery: number
+  probabilityQuery: number | undefined,
+  percentileQuery: number | undefined,
+  original_builder_string: string
 ): JsDiceMaterialized {
   // const jsDice = JsDice.build_from_string("2d6"); // REMOVE
 
-  let prob_all: {
-    lt: JsFractionMaterialized;
-    lte: JsFractionMaterialized;
-    eq: JsFractionMaterialized;
-    gte: JsFractionMaterialized;
-    gt: JsFractionMaterialized;
-  } = jsDice.prob_all(BigInt(probabilityQuery));
+  let probAll =
+    probabilityQuery === undefined
+      ? undefined
+      : convertProbAll(jsDice.prob_all(BigInt(probabilityQuery)));
 
   const mode = Array(jsDice.mode.length)
     .fill(0)
@@ -70,6 +71,7 @@ export function materializeJsDice(
   return {
     build_time: Number(jsDice.build_time),
     builder_string: jsDice.builder_string,
+    original_builder_string,
     min: jsDice.min,
     max: jsDice.max,
     mode,
@@ -80,7 +82,7 @@ export function materializeJsDice(
     cumulative_distribution: jsDice.cumulative_distribution,
     probabilityQuery: {
       query: probabilityQuery,
-      result: prob_all,
+      result: probAll,
     },
     percentileQuery: {
       query: percentileQuery,
@@ -89,10 +91,12 @@ export function materializeJsDice(
   };
 }
 
-// // because the getters on jsFraction are functions and not fields and are therefore not sent to the other thread.
-// export function materializeJsFraction(jsFraction: JsFraction) {
-//   return {
-//     string: jsFraction.string,
-//     float: jsFraction.float,
-//   };
-// }
+export function convertProbAll(fromRust: JsFractionMaterialized[]): ProbAll {
+  return {
+    lt: fromRust[0],
+    lte: fromRust[1],
+    eq: fromRust[2],
+    gte: fromRust[3],
+    gt: fromRust[4],
+  };
+}

@@ -22,12 +22,11 @@ const DistributionCalculator = () => {
     const segmentStates: {
       diceIndex: DiceIndex;
       calculationState: CalculationState;
-    }[] = ALL_DICE_INDICES.map((i) => state.inputSegments[i])
-      .filter((e) => e !== undefined)
-      .map((e) => {
-        const { diceIndex, calculationState } = e!;
-        return { diceIndex, calculationState };
-      });
+    }[] = state.segmentDisplayOrder.map((i) => {
+      const { diceIndex, calculationState } = state.inputSegments[i]!;
+      return { diceIndex, calculationState };
+    });
+
     const atLeastOneDiceCalculated = ALL_DICE_INDICES.some(
       (i) => state.computedDices[i]
     );
@@ -56,7 +55,7 @@ const DistributionCalculator = () => {
           grow="none"
         ></IconButton>
       )}
-      {atLeastOneDiceCalculated && (
+      {true /* TODO*/ && (
         <div>
           <DicePlotDisplay></DicePlotDisplay>
           <DiceStatsDisplay></DiceStatsDisplay>

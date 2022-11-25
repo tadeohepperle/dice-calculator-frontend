@@ -2,6 +2,7 @@ import type {
   DiceIndex,
   JsDiceMaterialized,
   JsFractionMaterialized,
+  ProbAll,
   RollResult,
 } from "../data_types";
 import type { Actions } from "../redux/actions";
@@ -37,16 +38,16 @@ export namespace WorkerMessages {
     extends AbstractWorkerMessage<{
       diceIndex: DiceIndex;
       input: string;
-      percentileQuery: number;
-      probabilityQuery: number;
+      percentileQuery: number | undefined;
+      probabilityQuery: number | undefined;
     }> {
     type: "Calculate";
   }
   export function calculateMessage(
     diceIndex: DiceIndex,
     input: string,
-    percentileQuery: number,
-    probabilityQuery: number
+    percentileQuery: number | undefined,
+    probabilityQuery: number | undefined
   ): CalculateMessage {
     return {
       type: "Calculate",
@@ -80,22 +81,18 @@ export namespace WorkerMessages {
   /// recalculate Probabilities:
   export interface CalculateProbabilityMessage
     extends AbstractWorkerMessage<
-      [
-        {
-          diceIndex: DiceIndex;
-          probabilityQuery: number;
-        }
-      ]
+      {
+        diceIndex: DiceIndex;
+        probabilityQuery: number;
+      }[]
     > {
     type: "CalculateProbability";
   }
   export function calculateProbabilityMessage(
-    indicesAndProbablities: [
-      {
-        diceIndex: DiceIndex;
-        probabilityQuery: number;
-      }
-    ]
+    indicesAndProbablities: {
+      diceIndex: DiceIndex;
+      probabilityQuery: number;
+    }[]
   ): CalculateProbabilityMessage {
     return {
       type: "CalculateProbability",
@@ -103,34 +100,28 @@ export namespace WorkerMessages {
     };
   }
   export type CalculateProbabilityResponse = AbstractWorkerResponse<
-    [
-      {
-        diceIndex: DiceIndex;
-        probability: JsFractionMaterialized;
-      }
-    ],
+    {
+      diceIndex: DiceIndex;
+      probability: ProbAll | undefined;
+    }[],
     "CalculateProbability"
   >;
 
   /// recalculate Percentiles:
   export interface CalculatePerccentileMessage
     extends AbstractWorkerMessage<
-      [
-        {
-          diceIndex: DiceIndex;
-          percentileQuery: number;
-        }
-      ]
+      {
+        diceIndex: DiceIndex;
+        percentileQuery: number;
+      }[]
     > {
     type: "CalculatePercentile";
   }
   export function calculatePerccentileMessage(
-    indicesAndPercentiles: [
-      {
-        diceIndex: DiceIndex;
-        percentileQuery: number;
-      }
-    ]
+    indicesAndPercentiles: {
+      diceIndex: DiceIndex;
+      percentileQuery: number;
+    }[]
   ): CalculatePerccentileMessage {
     return {
       type: "CalculatePercentile",
@@ -138,12 +129,10 @@ export namespace WorkerMessages {
     };
   }
   export type CalculatePerccentileResponse = AbstractWorkerResponse<
-    [
-      {
-        diceIndex: DiceIndex;
-        percentile: number;
-      }
-    ],
+    {
+      diceIndex: DiceIndex;
+      percentile: number;
+    }[],
     "CalculatePercentile"
   >;
 

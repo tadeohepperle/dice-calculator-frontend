@@ -28,12 +28,10 @@ if (window.Worker) {
 export async function wasmComputeDice(
   diceIndex: DiceIndex,
   input: string,
-  percentileQuery: number,
-  probabilityQuery: number
+  percentileQuery: number | undefined,
+  probabilityQuery: number | undefined
 ): Promise<JsDiceMaterialized> {
-  if (!worker) {
-    throw "Cannot compute dice, because worker is not setup!";
-  }
+  ensureWorkerIsPresent();
   let message = WorkerMessages.calculateMessage(
     diceIndex,
     input,
@@ -43,8 +41,27 @@ export async function wasmComputeDice(
   let { payload: diceMaterialized } = await postMessageAndAwaitResponse<
     WorkerMessages.CalculateMessage,
     WorkerMessages.CalculateResponse
-  >(worker, message);
+  >(worker!, message);
+
   return diceMaterialized as JsDiceMaterialized;
+}
+
+export async function wasmComputeProbabilities(
+  probabilityQuery: number
+): Promise<WorkerMessages.CalculateProbabilityResponse["payload"]> {
+  ensureWorkerIsPresent();
+  let message = WorkerMessages.calculateProbabilityMessage([
+    { diceIndex: 0, probabilityQuery },
+    { diceIndex: 1, probabilityQuery },
+    { diceIndex: 2, probabilityQuery },
+  ]);
+
+  let { payload } = await postMessageAndAwaitResponse<
+    WorkerMessages.CalculateProbabilityMessage,
+    WorkerMessages.CalculateProbabilityResponse
+  >(worker!, message);
+
+  return payload;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -69,10 +86,10 @@ function postMessageAndAwaitResponse<
       const id = Math.random();
       const listener = function (e: MessageEvent<any>) {
         let returnedData: WorkerMessages.PackedWorkerResponse<R> = e.data;
-        if (returnedData.id == id) {
+        if (returnedData.id === id) {
           worker.removeEventListener("message", listener, false);
           if (returnedData.failed) {
-            throw returnedData.message;
+            rej(returnedData.message);
           } else {
             res(returnedData.message);
           }
@@ -88,4 +105,10 @@ function postMessageAndAwaitResponse<
       rej(ex);
     }
   });
+}
+
+function ensureWorkerIsPresent() {
+  if (!worker) {
+    throw "Cannot compute dice, because worker is not setup!";
+  }
 }

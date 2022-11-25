@@ -5,8 +5,13 @@ import { Icons, UIColor, diceIndexToUiColor } from "./ui";
 
 import { useDispatch, useSelector } from "react-redux";
 import CloseButton from "./CloseButton";
-import type { AppState, CalculationState } from "../../logic/redux/state";
+import {
+  AppState,
+  CalculationState,
+  numberOfInputSegments,
+} from "../../logic/redux/state";
 import { Actions } from "../../logic/redux/actions";
+import { ALL_DICE_INDICES } from "../../logic/data_types";
 
 interface Props {
   diceIndex: 0 | 1 | 2;
@@ -15,14 +20,16 @@ interface Props {
 
 const DiceInputSegment = (props: Props) => {
   const { diceIndex, calculationState } = props;
-  const { inputValue, rollManyNumber } = useSelector((state: AppState) => {
+  const {
+    segment: { inputValue, rollManyNumber },
+    inputSegmentCount,
+  } = useSelector((state: AppState) => {
     let segment = state.inputSegments[diceIndex]!;
-    return segment;
+    let inputSegmentCount = numberOfInputSegments(state);
+
+    return { segment, inputSegmentCount };
   });
   const dispatch = useDispatch();
-
-  const isError = calculationState;
-
   let color: UIColor = diceIndexToUiColor(props.diceIndex);
   return (
     <div className="mt-5 pb-2.5 relative">
@@ -42,7 +49,7 @@ const DiceInputSegment = (props: Props) => {
             }}
           ></InputField>
         </div>
-        {diceIndex != 0 && (
+        {inputSegmentCount >= 2 && (
           <IconButton
             className="ml-4"
             uiColor={color}
@@ -55,7 +62,7 @@ const DiceInputSegment = (props: Props) => {
           ></IconButton>
         )}
       </div>
-      {calculationState.type == "error" && (
+      {calculationState.type == "error" && calculationState.message && (
         <div className="mt-3 ml-2">
           <span className="text-red-500">{calculationState.message}</span>
         </div>

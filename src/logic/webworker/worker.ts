@@ -1,10 +1,12 @@
-import { greet, JsDice, JsFraction } from "dices";
+import { greet, JsDice } from "dices";
 import {
   ALL_DICE_INDICES,
+  convertProbAll,
   DiceIndex,
   JsDiceMaterialized,
   JsFractionMaterialized,
   materializeJsDice,
+  ProbAll,
 } from "../data_types";
 import type { WorkerMessages } from "./worker_messages";
 
@@ -98,7 +100,8 @@ function calculateHandler(
   const materialized = materializeJsDice(
     dice,
     probabilityQuery,
-    percentileQuery
+    percentileQuery,
+    input
   );
   // cache it for future use.
   diceCache[diceIndex] = [input, dice, materialized];
@@ -117,6 +120,24 @@ function rollHandler(
 function calculateProbabilityHandler(
   payload: WorkerMessages.CalculateProbabilityMessage["payload"]
 ): WorkerMessages.CalculateProbabilityResponse {
+  let returnvalues: {
+    diceIndex: DiceIndex;
+    probability: ProbAll | undefined;
+  }[] = payload.map((p) => {
+    const { diceIndex, probabilityQuery } = p;
+    let dice = diceCache[diceIndex]?.[1];
+    if (!dice) {
+      return { diceIndex, probability: undefined };
+    } else {
+      let probAllFromRust = dice.prob_all(BigInt(probabilityQuery));
+      let probAll = convertProbAll(probAllFromRust);
+      return { diceIndex, probability: probAll };
+    }
+  });
+  return {
+    type: "CalculateProbability",
+    payload: returnvalues,
+  };
   throw "not implemented";
 }
 

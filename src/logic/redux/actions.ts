@@ -21,7 +21,9 @@ export namespace Actions {
     | Roll
     | ChangeRollManyNumber
     | AddErrorMessage
-    | RawReduction;
+    | RawReduction
+    | ChangeProbabilityQuery
+    | ChangePercentileQuery;
 
   ////////////////////////////////////////////////////////////////////////////////
   // ACTION DEFINITIONS
@@ -132,6 +134,29 @@ export namespace Actions {
     return { type: "AddDice", payload: {} };
   }
 
+  ////////////////////////////////////////////////////////////////////////////////
+
+  export type ChangeProbabilityQueryPayload = string;
+  export interface ChangeProbabilityQuery
+    extends AbstractAppStateAction<ChangeProbabilityQueryPayload> {
+    type: "ChangeProbabilityQuery";
+  }
+  export function changeProbabilityQuery(
+    input: string
+  ): ChangeProbabilityQuery {
+    return { type: "ChangeProbabilityQuery", payload: input };
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////
+
+  export type ChangePercentileQueryPayload = number;
+  export interface ChangePercentileQuery
+    extends AbstractAppStateAction<ChangePercentileQueryPayload> {
+    type: "ChangePercentileQuery";
+  }
+  export function changePercentileQuery(input: number): ChangePercentileQuery {
+    return { type: "ChangePercentileQuery", payload: input };
+  }
   ////////////////////////////////////////////////////////////////////////////////
 
   export interface AddErrorMessagePayload {

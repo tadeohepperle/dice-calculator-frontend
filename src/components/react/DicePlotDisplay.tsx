@@ -11,12 +11,12 @@ const DicePlotDisplay = (props: Props) => {
 
   return (
     <div>
-      {ALL_DICE_INDICES.map((i) => (
+      {/* {ALL_DICE_INDICES.map((i) => (
         <div key={i}>
           Dice Nr.{i + 1} <br></br>
           {computedDices[i]?.mean.float}
         </div>
-      ))}
+      ))} */}
     </div>
   );
 };
