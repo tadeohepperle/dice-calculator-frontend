@@ -7,21 +7,6 @@ export type Distribution = {
   values: [number, JsFractionMaterialized][];
 };
 
-export type Distributions = {
-  0?: {
-    cdf: Distribution;
-    pdf: Distribution;
-  };
-  1?: {
-    cdf: Distribution;
-    pdf: Distribution;
-  };
-  2?: {
-    cdf: Distribution;
-    pdf: Distribution;
-  };
-};
-
 export type JsDiceMaterialized = {
   build_time: number;
   builder_string: string; // created from dice_builder object
@@ -63,6 +48,29 @@ export type JsFractionMaterialized = {
 export type RollResult =
   | { type: "one"; number: number }
   | { type: "many"; numbers: number[] };
+
+export type DistributionChartData = {
+  availableDices: DiceIndex[];
+  data: {
+    title: string;
+    [0]?: number;
+    [1]?: number;
+    [2]?: number;
+    d1_frac?: string;
+    d2_frac?: string;
+    d3_frac?: string;
+  }[];
+};
+
+export type PdfAndCdfDistributionChartData = {
+  pdf: DistributionChartData;
+  cdf: DistributionChartData;
+};
+
+// {
+//   cdf:
+//   pdf:
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS

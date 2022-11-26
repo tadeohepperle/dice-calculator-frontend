@@ -1,9 +1,5 @@
 import { Provider, useDispatch, useSelector } from "react-redux";
-import {
-  ALL_DICE_INDICES,
-  DiceIndex,
-  Distributions,
-} from "../../logic/data_types";
+import { ALL_DICE_INDICES, DiceIndex } from "../../logic/data_types";
 import { Actions } from "../../logic/redux/actions";
 import type { AppState, CalculationState } from "../../logic/redux/state";
 import DiceInputSegment from "./DiceInputSegment";
@@ -16,13 +12,12 @@ import InputField from "./InputField";
 import { UIColor, Icons } from "./ui";
 
 const DistributionCalculator = () => {
-  const [segmentStates, atLeastOneDiceCalculated, distributions]: [
+  const [segmentStates, atLeastOneDiceCalculated]: [
     {
       diceIndex: DiceIndex;
       calculationState: CalculationState;
     }[],
-    boolean,
-    Distributions
+    boolean
   ] = useSelector((state: AppState) => {
     const segmentStates: {
       diceIndex: DiceIndex;
@@ -44,13 +39,8 @@ const DistributionCalculator = () => {
             pdf: state.computedDices[i]!.distribution,
           }
     );
-    const distributions = {
-      0: distributionsArr[0],
-      1: distributionsArr[1],
-      2: distributionsArr[2],
-    };
 
-    return [segmentStates, atLeastOneDiceCalculated, distributions];
+    return [segmentStates, atLeastOneDiceCalculated];
   });
   const dispatch = useDispatch();
   return (
@@ -77,7 +67,7 @@ const DistributionCalculator = () => {
       )}
       {atLeastOneDiceCalculated && (
         <div>
-          <DiceChartDisplay distributions={distributions}></DiceChartDisplay>
+          <DiceChartDisplay></DiceChartDisplay>
           <DiceStatsDisplay></DiceStatsDisplay>
         </div>
       )}

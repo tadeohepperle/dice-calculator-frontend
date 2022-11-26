@@ -1,3 +1,4 @@
+import type { PdfAndCdfDistributionChartData } from "./../data_types";
 import { JsDice } from "dices";
 import type { DiceIndex, JsDiceMaterialized } from "../data_types";
 import { WorkerMessages } from "./worker_messages";
@@ -31,20 +32,22 @@ export async function wasmComputeDice(
   input: string,
   percentileQuery: number | undefined,
   probabilityQuery: number | undefined
-): Promise<JsDiceMaterialized> {
+): Promise<[JsDiceMaterialized, PdfAndCdfDistributionChartData | "unchanged"]> {
   ensureWorkerIsPresent();
-  let message = WorkerMessages.calculateMessage(
+  const message = WorkerMessages.calculateMessage(
     diceIndex,
     input,
     percentileQuery,
     probabilityQuery
   );
-  let { payload: diceMaterialized } = await postMessageAndAwaitResponse<
+  const { payload } = await postMessageAndAwaitResponse<
     WorkerMessages.CalculateMessage,
     WorkerMessages.CalculateResponse
   >(worker!, message);
 
-  return diceMaterialized as JsDiceMaterialized;
+  const { dice, chartData } = payload;
+
+  return [dice, chartData];
 }
 
 export async function wasmComputeProbabilities(
@@ -81,6 +84,25 @@ export async function wasmComputePercentiles(
 
   return payload;
 }
+
+/**
+ * Does not delete the computed dice itself. It is kept in the workers memory for future potential cache hits.
+ * Instead it recomputes the chartData where the removal should be visible.
+ * @param diceIndex
+ */
+export async function wasmRemoveDice(
+  diceIndex: DiceIndex
+): Promise<PdfAndCdfDistributionChartData | "unchanged"> {
+  ensureWorkerIsPresent();
+  const message = WorkerMessages.removeDiceMessage(diceIndex);
+  const { payload } = await postMessageAndAwaitResponse<
+    WorkerMessages.RemoveDiceMessage,
+    WorkerMessages.RemoveDiceResponse
+  >(worker!, message);
+
+  return payload.chartData;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////

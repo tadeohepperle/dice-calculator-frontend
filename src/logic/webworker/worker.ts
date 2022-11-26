@@ -1,3 +1,4 @@
+import type { PdfAndCdfDistributionChartData } from "./../data_types";
 import { greet, JsDice } from "dices";
 import {
   ALL_DICE_INDICES,
@@ -23,6 +24,12 @@ const diceCache: Record<
   2: undefined,
 };
 
+const diceInputSegmentsShown: Record<DiceIndex, boolean> = {
+  0: false,
+  1: false,
+  2: false,
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 // EVENT HANDLING
 ////////////////////////////////////////////////////////////////////////////////
@@ -42,6 +49,8 @@ let messageResponseFunctionMap: Record<
       (msg as WorkerMessages.CalculateProbabilityMessage).payload
     ),
   Roll: (msg) => rollHandler((msg as WorkerMessages.RollMessage).payload),
+  RemoveDice: (msg) =>
+    removeDiceHandler((msg as WorkerMessages.RemoveDiceMessage).payload),
 };
 
 onmessage = function (e) {
@@ -82,14 +91,24 @@ function calculateHandler(
   // check cache:
   for (const i of ALL_DICE_INDICES) {
     let cached = diceCache[i];
-    if (cached) {
+    if (cached !== undefined) {
       let [oldInput, dice, materialized] = cached!;
       if (oldInput == input || dice.builder_string == input) {
-        // this is a hit!
-        diceCache[diceIndex] = [input, dice, materialized];
+        // this is a hit! Copy dice information over to the requested slot.
+        // avoids having to recompute dice
+        const sameDiceDifferentSlot: boolean = i != diceIndex;
+        if (sameDiceDifferentSlot) {
+          diceCache[diceIndex] = [input, dice, materialized];
+        }
+        // if the cache hit was not from the same slot as requested, we need to recalculate distributions
+        const chartData = sameDiceDifferentSlot
+          ? calculateChartData()
+          : "unchanged";
+
+        diceInputSegmentsShown[diceIndex] = true;
         return {
           type: "Calculate",
-          payload: materialized,
+          payload: { dice: materialized, chartData },
         };
       }
     }
@@ -103,11 +122,16 @@ function calculateHandler(
     percentileQuery,
     input
   );
+
   // cache it for future use.
   diceCache[diceIndex] = [input, dice, materialized];
+
+  let chartData = calculateChartData();
+
+  diceInputSegmentsShown[diceIndex] = true;
   return {
     type: "Calculate",
-    payload: materialized,
+    payload: { dice: materialized, chartData },
   };
 }
 
@@ -159,6 +183,23 @@ function calculatePercentileHandler(
   return { type: "CalculatePercentile", payload: returnvalues };
 }
 
+function removeDiceHandler(
+  payload: WorkerMessages.RemoveDiceMessage["payload"]
+): WorkerMessages.RemoveDiceResponse {
+  // the task of this function is to possibly recalculate the chartData
+  // if a dice represented in the chartdata was removed
+  // notice: if the dice input segment was removed
+  // but no dice had been calculated in the first place we can just return "unchanged"
+
+  if (!diceCache[payload.diceIndex]) {
+    return { type: "RemoveDice", payload: { chartData: "unchanged" } };
+  }
+  // we DO NOT remove the calculated dice from the cache though:
+  // it could be useful to keep them around for later, they will just not be displayed.
+  let chartData = calculateChartData();
+  return { type: "RemoveDice", payload: { chartData } };
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
@@ -176,3 +217,20 @@ function postSuccess(id: number, message: WorkerMessages.WorkerResponse) {
 //   obj.ptr = ptr;
 //   return obj;
 // }
+
+function calculateChartData(): PdfAndCdfDistributionChartData {
+  // get min and max values that delimit the chart:
+  // pdf and cdf should have the same max values
+
+  // let min = ALL_DICE_INDICES.map(i =>
+  //  diceCache[i]?.[2].  || Infinity
+
+  //   )
+
+  throw "not implemented";
+}
+
+// function  sasasadds( a: {
+//   0?: Distribution,
+//   1?: Dis
+// })

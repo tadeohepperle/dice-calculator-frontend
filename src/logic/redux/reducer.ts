@@ -1,3 +1,4 @@
+import type { PdfAndCdfDistributionChartData } from "./../data_types";
 import {
   configureStore,
   Reducer,
@@ -10,6 +11,7 @@ import {
   wasmComputeDice,
   wasmComputePercentiles,
   wasmComputeProbabilities,
+  wasmRemoveDice,
 } from "../webworker/webworker_interface";
 import { ALL_DICE_INDICES, DiceIndex, JsDiceMaterialized } from "../data_types";
 import { Actions } from "./actions";
@@ -108,6 +110,20 @@ function deleteDiceReducer(
   const { diceIndex } = payload;
   let segs = { ...state.inputSegments, [diceIndex]: undefined };
   let dices = { ...state.computedDices, [diceIndex]: undefined };
+
+  if (state.computedDices[diceIndex] !== undefined) {
+    (async (diceIndex) => {
+      let chartData = await wasmRemoveDice(diceIndex);
+      if (chartData !== "unchanged") {
+        let c = chartData;
+        let reduction = (state: AppState): AppState => ({
+          ...state,
+          chartData: c,
+        });
+        safeDispatchMiddleware.dispatch(Actions.rawReduction(reduction));
+      }
+    })(diceIndex);
+  }
   return {
     ...state,
     inputSegments: segs,
@@ -171,7 +187,7 @@ function calculateDistributionReducer(
     try {
       let percentileQueryNum = parseInt(state.percentileQuery);
       let probabilityQueryNum = parseInt(state.probabilityQuery);
-      let dice: JsDiceMaterialized = await wasmComputeDice(
+      let [dice, chartData] = await wasmComputeDice(
         diceIndex,
         input,
         isNaN(percentileQueryNum) ? undefined : percentileQueryNum,
@@ -182,6 +198,9 @@ function calculateDistributionReducer(
         let newState = updateCalculationStateInState(state, diceIndex, {
           type: "done",
         });
+        if (chartData !== "unchanged") {
+          newState = { ...newState, chartData };
+        }
         return updateComputedDiceInState(newState, diceIndex, dice);
       };
       safeDispatchMiddleware.dispatch(Actions.rawReduction(reduction));

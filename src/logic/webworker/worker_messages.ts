@@ -2,6 +2,7 @@ import type {
   DiceIndex,
   JsDiceMaterialized,
   JsFractionMaterialized,
+  PdfAndCdfDistributionChartData,
   ProbAll,
   RollResult,
 } from "../data_types";
@@ -12,12 +13,14 @@ export namespace WorkerMessages {
     | CalculateMessage
     | RollMessage
     | CalculateProbabilityMessage
-    | CalculatePerccentileMessage;
+    | CalculatePerccentileMessage
+    | RemoveDiceMessage;
   export type WorkerResponse =
     | CalculateResponse
     | RollResponse
     | CalculateProbabilityResponse
-    | CalculatePerccentileResponse;
+    | CalculatePerccentileResponse
+    | RemoveDiceResponse;
 
   export type PackedWorkerMessage<T extends WorkerMessage> = {
     id: number;
@@ -60,8 +63,31 @@ export namespace WorkerMessages {
     };
   }
   export type CalculateResponse = AbstractWorkerResponse<
-    JsDiceMaterialized,
+    {
+      dice: JsDiceMaterialized;
+      chartData: PdfAndCdfDistributionChartData | "unchanged";
+    },
     "Calculate"
+  >;
+
+  /// remove Dice:
+  export interface RemoveDiceMessage
+    extends AbstractWorkerMessage<{
+      diceIndex: DiceIndex;
+    }> {
+    type: "RemoveDice";
+  }
+  export function removeDiceMessage(diceIndex: DiceIndex): RemoveDiceMessage {
+    return {
+      type: "RemoveDice",
+      payload: { diceIndex },
+    };
+  }
+  export type RemoveDiceResponse = AbstractWorkerResponse<
+    {
+      chartData: PdfAndCdfDistributionChartData | "unchanged";
+    },
+    "RemoveDice"
   >;
 
   /// roll Dice:
@@ -135,15 +161,6 @@ export namespace WorkerMessages {
     }[],
     "CalculatePercentile"
   >;
-
-  // I want to enforce these somehow by TypeScript but I think higher kinded types/generics would be needed for this.
-  // export type WorkerMessageResponsePairs =
-  //   | Pair<CalculateMessage, CalculateResponse>
-  //   | Pair<RollMessage, RollResponse>;
-  // type Pair<M, R> = {
-  //   message: M;
-  //   response: R;
-  // };
 }
 
 type AbstractWorkerMessage<T> = {
