@@ -20,12 +20,13 @@
     "@types/react": "^18.0.21",
     "@types/react-dom": "^18.0.6",
     "astro": "^1.5.0",
+    "dices": "file:../../rust/dices/pkg",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.5",
+    "recharts": "^2.1.16",
     "tailwindcss": "^3.1.8",
     "vite-plugin-top-level-await": "^1.2.1",
-    "vite-plugin-wasm": "^3.1.0",
-    "dices": "file:../../rust/dices/pkg"
+    "vite-plugin-wasm": "^3.1.0"
   }
 }
