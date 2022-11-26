@@ -266,7 +266,8 @@ function calculateChartData(): PdfAndCdfDistributionChartData | undefined {
       i++
     ) {
       const [val, pdf_frac] = diceCache[diceIndex]![2].distribution.values[i];
-      const [_, cdf_frac] = diceCache[diceIndex]![2].distribution.values[i];
+      const [_, cdf_frac] =
+        diceCache[diceIndex]![2].cumulative_distribution.values[i];
       // assert val === _
       pdfAgg.get(val)!.set(diceIndex, pdf_frac);
       cdfAgg.get(val)!.set(diceIndex, cdf_frac);
@@ -280,11 +281,14 @@ function calculateChartData(): PdfAndCdfDistributionChartData | undefined {
   for (let i = min; i <= max; i++) {
     let cdfMapRef = cdfAgg.get(i);
     for (const diceIndex of RELEVANT_DICE_INDICES) {
-      if (
-        cdfMapRef!.get(diceIndex) === undefined &&
-        lastVal.get(diceIndex) !== undefined
-      ) {
-        cdfMapRef!.set(diceIndex, lastVal.get(diceIndex)!);
+      let v = cdfMapRef!.get(diceIndex);
+      if (v === undefined) {
+        let lv = lastVal.get(diceIndex);
+        if (lv !== undefined) {
+          cdfMapRef!.set(diceIndex, lv);
+        }
+      } else {
+        lastVal.set(diceIndex, v);
       }
     }
   }

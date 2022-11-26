@@ -37,13 +37,10 @@ const DiceChartDisplay = (props: Props) => {
     }
   );
 
-  let [n, setN] = useState(10);
-
   const width = 200;
   const height = 200;
   const verticalMargin = 40;
 
-  console.log("chartData.pdf.availableDices", chartData!.pdf.availableDices);
   return (
     <div className=" text-white rounded" style={{ width: "100%", height: 300 }}>
       {chartData && (
@@ -64,7 +61,7 @@ const DiceChartDisplay = (props: Props) => {
             <YAxis />
             <Tooltip />
             <Legend />
-            {chartData.pdf.availableDices.map((i) => (
+            {chartData[mode].availableDices.map((i) => (
               <Bar key={i} dataKey={i} fill={diceIndexToColor(i)} />
             ))}
             {/* <Bar dataKey={0} fill={diceIndexToColor(0)} />; */}
