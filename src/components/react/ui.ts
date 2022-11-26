@@ -1,3 +1,4 @@
+import type { DiceIndex } from "./../../logic/data_types";
 export enum UIColor {
   Primary, // sky
   Secondary, // rose
@@ -5,8 +6,12 @@ export enum UIColor {
   Ghost,
 }
 
-export function diceIndexToUiColor(i: 0 | 1 | 2) {
+export function diceIndexToUiColor(i: DiceIndex) {
   return [UIColor.Primary, UIColor.Secondary, UIColor.Tertiary][i];
+}
+
+export function diceIndexToColor(i: DiceIndex): string {
+  return ["#bae6fd", "#fecdd3", "#fed7aa"][i];
 }
 
 export interface UIIcon {

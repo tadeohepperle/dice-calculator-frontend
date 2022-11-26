@@ -56,9 +56,9 @@ export type DistributionChartData = {
     [0]?: number;
     [1]?: number;
     [2]?: number;
+    d0_frac?: string;
     d1_frac?: string;
     d2_frac?: string;
-    d3_frac?: string;
   }[];
 };
 

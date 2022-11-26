@@ -1,4 +1,7 @@
-import type { PdfAndCdfDistributionChartData } from "./../data_types";
+import type {
+  DistributionChartData,
+  PdfAndCdfDistributionChartData,
+} from "./../data_types";
 import { greet, JsDice } from "dices";
 import {
   ALL_DICE_INDICES,
@@ -10,6 +13,7 @@ import {
   ProbAll,
 } from "../data_types";
 import type { WorkerMessages } from "./worker_messages";
+import { last } from "../utils";
 
 ////////////////////////////////////////////////////////////////////////////////
 // KEEPING STATE
@@ -100,12 +104,12 @@ function calculateHandler(
         if (sameDiceDifferentSlot) {
           diceCache[diceIndex] = [input, dice, materialized];
         }
+        diceInputSegmentsShown[diceIndex] = true;
         // if the cache hit was not from the same slot as requested, we need to recalculate distributions
         const chartData = sameDiceDifferentSlot
-          ? calculateChartData()
+          ? calculateChartData()!
           : "unchanged";
 
-        diceInputSegmentsShown[diceIndex] = true;
         return {
           type: "Calculate",
           payload: { dice: materialized, chartData },
@@ -125,10 +129,10 @@ function calculateHandler(
 
   // cache it for future use.
   diceCache[diceIndex] = [input, dice, materialized];
-
-  let chartData = calculateChartData();
-
   diceInputSegmentsShown[diceIndex] = true;
+
+  let chartData = calculateChartData()!;
+
   return {
     type: "Calculate",
     payload: { dice: materialized, chartData },
@@ -190,7 +194,7 @@ function removeDiceHandler(
   // if a dice represented in the chartdata was removed
   // notice: if the dice input segment was removed
   // but no dice had been calculated in the first place we can just return "unchanged"
-
+  diceInputSegmentsShown[payload.diceIndex] = false;
   if (!diceCache[payload.diceIndex]) {
     return { type: "RemoveDice", payload: { chartData: "unchanged" } };
   }
@@ -218,19 +222,119 @@ function postSuccess(id: number, message: WorkerMessages.WorkerResponse) {
 //   return obj;
 // }
 
-function calculateChartData(): PdfAndCdfDistributionChartData {
+/**
+ * the context in which this function is called that at least one dice is present in the dice cache i
+ * and for this dice diceInputSegmentsShown[i] must be true
+ */
+function calculateChartData(): PdfAndCdfDistributionChartData | undefined {
   // get min and max values that delimit the chart:
   // pdf and cdf should have the same max values
 
-  // let min = ALL_DICE_INDICES.map(i =>
-  //  diceCache[i]?.[2].  || Infinity
+  const RELEVANT_DICE_INDICES = ALL_DICE_INDICES.filter(
+    (i) => diceInputSegmentsShown[i] && diceCache[i] !== undefined
+  );
+  if (RELEVANT_DICE_INDICES.length == 0) {
+    return undefined;
+  }
 
-  //   )
+  let min = Math.min(
+    ...RELEVANT_DICE_INDICES.map(
+      (i) => diceCache[i]?.[2].distribution.values[0]?.[0] || Infinity
+    )
+  );
 
-  throw "not implemented";
+  let max = Math.max(
+    ...RELEVANT_DICE_INDICES.map(
+      (i) => last(diceCache[i]?.[2].distribution.values)?.[0] || -Infinity
+    )
+  );
+
+  let pdfAgg: Map<number, Map<DiceIndex, JsFractionMaterialized>> = new Map();
+  let cdfAgg: Map<number, Map<DiceIndex, JsFractionMaterialized>> = new Map();
+
+  // fill maps with empty maps for each number:
+  for (let i = min; i <= max; i++) {
+    pdfAgg.set(i, new Map());
+    cdfAgg.set(i, new Map());
+  }
+
+  // fill submaps with the actual values:
+  for (const diceIndex of RELEVANT_DICE_INDICES) {
+    for (
+      let i = 0;
+      i < diceCache[diceIndex]![2].distribution.values.length;
+      i++
+    ) {
+      const [val, pdf_frac] = diceCache[diceIndex]![2].distribution.values[i];
+      const [_, cdf_frac] = diceCache[diceIndex]![2].distribution.values[i];
+      // assert val === _
+      pdfAgg.get(val)!.set(diceIndex, pdf_frac);
+      cdfAgg.get(val)!.set(diceIndex, cdf_frac);
+    }
+  }
+  // go over cdf to fill in missing values:
+  let lastVal: Map<DiceIndex, JsFractionMaterialized | undefined> = new Map();
+  for (const diceIndex of RELEVANT_DICE_INDICES) {
+    lastVal.set(diceIndex, undefined);
+  }
+  for (let i = min; i <= max; i++) {
+    let cdfMapRef = cdfAgg.get(i);
+    for (const diceIndex of RELEVANT_DICE_INDICES) {
+      if (
+        cdfMapRef!.get(diceIndex) === undefined &&
+        lastVal.get(diceIndex) !== undefined
+      ) {
+        cdfMapRef!.set(diceIndex, lastVal.get(diceIndex)!);
+      }
+    }
+  }
+
+  let pdf = transformHashMapToChartData(
+    pdfAgg,
+    min,
+    max,
+    RELEVANT_DICE_INDICES
+  );
+
+  let cdf = transformHashMapToChartData(
+    cdfAgg,
+    min,
+    max,
+    RELEVANT_DICE_INDICES
+  );
+  return { cdf, pdf };
 }
 
-// function  sasasadds( a: {
-//   0?: Distribution,
-//   1?: Dis
-// })
+function transformHashMapToChartData(
+  hashmap: Map<number, Map<DiceIndex, JsFractionMaterialized>>,
+  min: number,
+  max: number,
+  availableDices: DiceIndex[]
+): DistributionChartData {
+  const data = Array(max - min + 1)
+    .fill(0)
+    .map((e, i) => i + min)
+    .map((i) => {
+      let o: {
+        title: string;
+        [0]?: number;
+        [1]?: number;
+        [2]?: number;
+        d0_frac?: string;
+        d1_frac?: string;
+        d2_frac?: string;
+      } = {
+        title: `Number ${i}`,
+      };
+      for (const diceIndex of availableDices) {
+        let fracMat = hashmap.get(i)?.get(diceIndex);
+        o[diceIndex] = fracMat?.float;
+        o[`d${diceIndex}_frac`] = fracMat?.string;
+      }
+      return o;
+    });
+  return {
+    availableDices,
+    data,
+  };
+}

@@ -23,6 +23,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { last } from "../../logic/utils";
+import { diceIndexToColor } from "./ui";
 
 export interface Props {}
 
@@ -42,15 +43,9 @@ const DiceChartDisplay = (props: Props) => {
   const height = 200;
   const verticalMargin = 40;
 
+  console.log("chartData.pdf.availableDices", chartData!.pdf.availableDices);
   return (
     <div className=" text-white rounded" style={{ width: "100%", height: 300 }}>
-      <button
-        onClick={() => {
-          setN(n + 1);
-        }}
-      >
-        CLick to add {n}
-      </button>
       {chartData && (
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
@@ -64,13 +59,15 @@ const DiceChartDisplay = (props: Props) => {
               bottom: 5,
             }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
+            {/* <CartesianGrid strokeDasharray="3 3" /> */}
             <XAxis dataKey="name" />
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey={0} fill="#8884d8" />
-            {/* <Bar dataKey="d2" fill="#82ca9d" /> */}
+            {chartData.pdf.availableDices.map((i) => (
+              <Bar key={i} dataKey={i} fill={diceIndexToColor(i)} />
+            ))}
+            {/* <Bar dataKey={0} fill={diceIndexToColor(0)} />; */}
           </BarChart>
         </ResponsiveContainer>
       )}

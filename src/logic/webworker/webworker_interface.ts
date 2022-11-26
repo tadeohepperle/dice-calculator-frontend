@@ -92,7 +92,7 @@ export async function wasmComputePercentiles(
  */
 export async function wasmRemoveDice(
   diceIndex: DiceIndex
-): Promise<PdfAndCdfDistributionChartData | "unchanged"> {
+): Promise<PdfAndCdfDistributionChartData | "unchanged" | undefined> {
   ensureWorkerIsPresent();
   const message = WorkerMessages.removeDiceMessage(diceIndex);
   const { payload } = await postMessageAndAwaitResponse<

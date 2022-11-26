@@ -10,6 +10,5 @@ export async function mscounter() {
 }
 
 export function last<T>(array: T[] | undefined): T | undefined {
-  console.log(array, array?.length);
   return array?.[array?.length - 1];
 }

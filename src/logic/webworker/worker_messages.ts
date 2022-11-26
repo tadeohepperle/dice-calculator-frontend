@@ -85,7 +85,7 @@ export namespace WorkerMessages {
   }
   export type RemoveDiceResponse = AbstractWorkerResponse<
     {
-      chartData: PdfAndCdfDistributionChartData | "unchanged";
+      chartData: PdfAndCdfDistributionChartData | undefined | "unchanged";
     },
     "RemoveDice"
   >;
