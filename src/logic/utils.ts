@@ -8,3 +8,8 @@ export async function mscounter() {
     console.log(i * 50);
   }
 }
+
+export function last<T>(array: T[] | undefined): T | undefined {
+  console.log(array, array?.length);
+  return array?.[array?.length - 1];
+}

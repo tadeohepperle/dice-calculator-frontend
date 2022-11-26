@@ -3,6 +3,25 @@ import type { JsDice } from "dices";
 export type DiceIndex = 0 | 1 | 2;
 export const ALL_DICE_INDICES: [0, 1, 2] = [0, 1, 2];
 
+export type Distribution = {
+  values: [number, JsFractionMaterialized][];
+};
+
+export type Distributions = {
+  0?: {
+    cdf: Distribution;
+    pdf: Distribution;
+  };
+  1?: {
+    cdf: Distribution;
+    pdf: Distribution;
+  };
+  2?: {
+    cdf: Distribution;
+    pdf: Distribution;
+  };
+};
+
 export type JsDiceMaterialized = {
   build_time: number;
   builder_string: string; // created from dice_builder object
@@ -13,8 +32,8 @@ export type JsDiceMaterialized = {
   median: bigint;
   mean: JsFractionMaterialized;
   variance: JsFractionMaterialized;
-  distribution: any; // TODO
-  cumulative_distribution: any; // TODO
+  distribution: Distribution; // TODO
+  cumulative_distribution: Distribution; // TODO
   probabilityQuery: {
     query: number | undefined;
     result: ProbAll | undefined; // stands for loading

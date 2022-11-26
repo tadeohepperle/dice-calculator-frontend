@@ -1,3 +1,4 @@
+import type { Distributions } from "./../data_types";
 import {
   ALL_DICE_INDICES,
   DiceIndex,
@@ -61,3 +62,20 @@ export const numberOfInputSegments = (state: AppState): number =>
   ALL_DICE_INDICES.map((i) =>
     state.inputSegments[i] !== undefined ? (1 as number) : 0
   ).reduce((a, c) => a + c, 0);
+
+export const getDistributions = (state: AppState): Distributions => {
+  return {
+    0: state.computedDices[0] && {
+      pdf: state.computedDices[0].distribution,
+      cdf: state.computedDices[0].cumulative_distribution,
+    },
+    1: state.computedDices[1] && {
+      pdf: state.computedDices[1].distribution,
+      cdf: state.computedDices[1].cumulative_distribution,
+    },
+    2: state.computedDices[2] && {
+      pdf: state.computedDices[2].distribution,
+      cdf: state.computedDices[2].cumulative_distribution,
+    },
+  };
+};

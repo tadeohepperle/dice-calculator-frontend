@@ -177,6 +177,7 @@ function calculateDistributionReducer(
         isNaN(percentileQueryNum) ? undefined : percentileQueryNum,
         isNaN(probabilityQueryNum) ? undefined : probabilityQueryNum
       );
+      console.log(dice.distribution);
       const reduction = (s: RootState): RootState => {
         let newState = updateCalculationStateInState(state, diceIndex, {
           type: "done",
