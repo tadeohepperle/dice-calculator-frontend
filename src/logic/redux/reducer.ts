@@ -31,16 +31,11 @@ const actionTypeFunctionMap: Record<
   (state: AppState, action: Actions.AppStateAction) => AppState
 > = {
   RawReduction: (s, a) => (a as Actions.RawReduction).payload(s),
-  ChangeInput: (s, a) =>
-    changeInputReducer(s, a.payload as Actions.ChangeInputPayload),
+
   DeleteDice: (s, a) =>
     deleteDiceReducer(s, a.payload as Actions.DeleteDicePayload),
   AddDice: (s, a) => addDiceReducer(s, a.payload as Actions.AddDicePayload),
-  ChangeRollManyNumber: (s, a) =>
-    changeRollManyNumberReducer(
-      s,
-      a.payload as Actions.ChangeRollManyNumberPayload
-    ),
+
   CalculateDistribution: (s, a) =>
     calculateDistributionReducer(
       s,
@@ -89,19 +84,6 @@ export type AppDispatch = typeof store.dispatch;
 ////////////////////////////////////////////////////////////////////////////////
 // INDIVIDUAL REDUCER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
-
-function changeInputReducer(
-  state: AppState,
-  payload: Actions.ChangeInputPayload
-): AppState {
-  const { diceIndex } = payload;
-  let seg: DiceInputSegmentState = {
-    ...state.inputSegments[payload.diceIndex]!,
-    inputValue: payload.value,
-    calculationState: { type: "newinput" },
-  };
-  return updateSegInState(state, diceIndex, seg);
-}
 
 function deleteDiceReducer(
   state: AppState,
@@ -161,23 +143,11 @@ function addDiceReducer(
   }
 }
 
-function changeRollManyNumberReducer(
-  state: AppState,
-  payload: Actions.ChangeRollManyNumberPayload
-): AppState {
-  const { diceIndex, value } = payload;
-  let seg: DiceInputSegmentState = {
-    ...state.inputSegments[diceIndex]!,
-    rollManyNumber: value,
-  };
-  return updateSegInState(state, diceIndex, seg);
-}
-
 function calculateDistributionReducer(
   state: AppState,
   payload: Actions.CalculateDistributionPayload
 ): AppState {
-  let input = state.inputSegments[payload.diceIndex]!.inputValue;
+  let { diceIndex, inputValue: input } = payload;
   (async (diceIndex: DiceIndex, input: string) => {
     if (!input) {
       return safeDispatchMiddleware.dispatch(
@@ -208,13 +178,13 @@ function calculateDistributionReducer(
         Actions.addErrorMessage(diceIndex, "Computation resulted in error")
       );
     }
-  })(payload.diceIndex, input);
+  })(diceIndex, input);
 
   let seg: DiceInputSegmentState = {
-    ...state.inputSegments[payload.diceIndex]!,
+    ...state.inputSegments[diceIndex]!,
     calculationState: { type: "calculating" },
   };
-  return updateSegInState(state, payload.diceIndex, seg);
+  return updateSegInState(state, diceIndex, seg);
 }
 
 function rollReducer(state: AppState, payload: Actions.RollPayload): AppState {

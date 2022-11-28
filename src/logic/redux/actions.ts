@@ -14,12 +14,10 @@ export namespace Actions {
   // ALL AVAILABLE ACTIONS
   ////////////////////////////////////////////////////////////////////////////////
   export type AppStateAction =
-    | ChangeInput
     | DeleteDice
     | AddDice
     | CalculateDistribution
     | Roll
-    | ChangeRollManyNumber
     | AddErrorMessage
     | RawReduction
     | ChangeProbabilityQuery
@@ -43,51 +41,22 @@ export namespace Actions {
 
   ////////////////////////////////////////////////////////////////////////////////
 
-  export interface ChangeInputPayload {
-    value: string;
-    diceIndex: DiceIndex;
-  }
-  export interface ChangeInput
-    extends AbstractAppStateAction<ChangeInputPayload> {
-    type: "ChangeInput";
-  }
-  export function changeInput(
-    diceIndex: DiceIndex,
-    value: string
-  ): ChangeInput {
-    return { type: "ChangeInput", payload: { diceIndex, value } };
-  }
-
-  ////////////////////////////////////////////////////////////////////////////////
-
-  export interface ChangeRollManyNumberPayload {
-    value: number;
-    diceIndex: DiceIndex;
-  }
-  export interface ChangeRollManyNumber
-    extends AbstractAppStateAction<ChangeRollManyNumberPayload> {
-    type: "ChangeRollManyNumber";
-  }
-  export function changeRollManyNumber(
-    diceIndex: DiceIndex,
-    value: number
-  ): ChangeRollManyNumber {
-    return { type: "ChangeRollManyNumber", payload: { diceIndex, value } };
-  }
-
-  ////////////////////////////////////////////////////////////////////////////////
-
   export interface CalculateDistributionPayload {
     diceIndex: DiceIndex;
+    inputValue: string;
   }
   export interface CalculateDistribution
     extends AbstractAppStateAction<CalculateDistributionPayload> {
     type: "CalculateDistribution";
   }
   export function calculateDistribution(
-    diceIndex: DiceIndex
+    diceIndex: DiceIndex,
+    inputValue: string
   ): CalculateDistribution {
-    return { type: "CalculateDistribution", payload: { diceIndex } };
+    return {
+      type: "CalculateDistribution",
+      payload: { diceIndex, inputValue },
+    };
   }
 
   ////////////////////////////////////////////////////////////////////////////////

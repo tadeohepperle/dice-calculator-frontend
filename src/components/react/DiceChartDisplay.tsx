@@ -65,9 +65,7 @@ const DiceChartDisplay = (props: Props) => {
             <YAxis stroke="white" />
             <Tooltip
               cursor={{
-                // stroke: "red",
-                // strokeWidth: 2,
-                stroke: "rgba(255,255,255,0.3)",
+                fill: "rgba(255,255,255,0.2)",
               }}
               contentStyle={{
                 background: "#0f172a",
@@ -100,7 +98,7 @@ const DiceChartDisplay = (props: Props) => {
                 ];
               }}
             />
-            <Legend
+            {/* <Legend
               payload={chartData[mode].availableDices.map((i) => ({
                 color: diceIndexToColor(i),
                 value: diceIndexToInputString(i),
@@ -112,7 +110,7 @@ const DiceChartDisplay = (props: Props) => {
               //   console.log("props", props);
               //   return <div>Hehe</div>;
               // }}
-            />
+            /> */}
             {chartData[mode].availableDices.map((i) => (
               <Bar key={i} dataKey={i} fill={diceIndexToColor(i)} />
             ))}

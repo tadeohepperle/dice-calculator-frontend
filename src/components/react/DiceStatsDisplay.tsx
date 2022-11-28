@@ -7,11 +7,19 @@ import {
 } from "../../logic/data_types";
 import { Actions } from "../../logic/redux/actions";
 import type { AppState } from "../../logic/redux/state";
+import { diceIndexToColor } from "./ui";
 import LoadingSpinner from "./utility/LoadingSpinner";
 
 export interface Props {}
 
 type ComparatorMode = "lt" | "lte" | "eq" | "gte" | "gt";
+const comparatorModeSymbolMap: Record<ComparatorMode, string> = {
+  lt: "<",
+  lte: "≤",
+  eq: "=",
+  gte: "≥",
+  gt: ">",
+};
 
 const DiceStatsDisplay = (props: Props) => {
   const [comparatorMode, setComparatorMode] = useState<ComparatorMode>("eq");
@@ -24,58 +32,80 @@ const DiceStatsDisplay = (props: Props) => {
       };
     }
   );
+  const numDices = ALL_DICE_INDICES.filter(
+    (i) => computedDices[i] !== undefined
+  ).length;
   const dispatch = useDispatch();
-
+  console.log(`${numDices * 200}px`);
   return (
-    <div className="min-w-min">
-      <table>
+    <div className="mt-3 min-w-min flex justify-center md:justify-start">
+      <table
+        className="text-white table-auto "
+        style={{ maxWidth: `${160 + numDices * 140}px` }}
+      >
         <thead>
           <tr>
-            <th>Stat</th>
-            {createHeaderCellsFromDices(
-              computedDices,
-              (d) => d.original_builder_string
-            )}
+            <th></th>
+            {createHeaderCellsFromDices(computedDices, (d, i) => (
+              <span className="px-3" style={{ color: diceIndexToColor(i) }}>
+                {d.original_builder_string}
+              </span>
+            ))}
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <th>Mean</th>
+          <tr className="bg-slate-600">
+            <th className="text-right pr-3 py-1 w-40">Mean</th>
             {createCellsFromDices(computedDices, (d) => formatFraction(d.mean))}
           </tr>
           <tr>
-            <th>Variance</th>
+            <th className="text-right pr-3 py-1">Variance</th>
             {createCellsFromDices(computedDices, (d) =>
               formatFraction(d.variance)
             )}
           </tr>
-          <tr>
-            <th>Median</th>
+          <tr className="bg-slate-600">
+            <th className="text-right pr-3 py-1">Median</th>
             {createCellsFromDices(computedDices, (d) => d.median.toString())}
           </tr>
           <tr>
-            <th>Mode</th>
+            <th className="text-right pr-3 py-1">Mode</th>
             {createCellsFromDices(computedDices, (d) => d.mode.join(", "))}
           </tr>
 
-          <tr>
-            <th>Min</th>
+          <tr className="bg-slate-600">
+            <th className="text-right pr-3 py-1">Min</th>
             {createCellsFromDices(computedDices, (d) => d.min.toString())}
           </tr>
           <tr>
-            <th>Max</th>
+            <th className="text-right pr-3 py-1">Max</th>
             {createCellsFromDices(computedDices, (d) => d.max.toString())}
           </tr>
-          <tr>
-            <th>
-              <div className="flex">
-                Probability
+          <tr className="bg-slate-600">
+            <th className="text-right pr-2 py-1">
+              Probability
+              <div className="flex py-1 justify-end">
+                <select
+                  name="mode"
+                  id="modeSelect"
+                  className="ml-2 h-6 ring-0 px-1 pb-1 pt-0 input-shadow leading-tight bg-slate-900 font-bold transition-all  text-white rounded-lg"
+                  value={comparatorMode}
+                  onChange={(e) => {
+                    setComparatorMode(e.target.value as ComparatorMode);
+                  }}
+                >
+                  {Object.keys(comparatorModeSymbolMap).map((k) => (
+                    <option value={k} key={k}>
+                      {comparatorModeSymbolMap[k as ComparatorMode]}
+                    </option>
+                  ))}
+                </select>
                 <input
                   onChange={(e) =>
                     dispatch(Actions.changeProbabilityQuery(e.target.value))
                   }
                   type="number"
-                  className="w-16 pr-1 pl-3 py-1 ring-0 ml-2 text-sm input-shadow appearance-none leading-tight bg-slate-900 font-bold transition-all  text-white rounded-lg block"
+                  className="h-6 text-sm w-16 pr-1 pl-3 py-1 ring-0 ml-2 input-shadow appearance-none leading-tight bg-slate-900 font-bold transition-all  text-white rounded-lg block"
                   inputMode="numeric"
                   value={probabilityQuery}
                 />
@@ -86,15 +116,15 @@ const DiceStatsDisplay = (props: Props) => {
             })}
           </tr>
           <tr>
-            <th>
-              <div className="flex">
-                Percentile
+            <th className="text-right pr-2 py-1">
+              Percentile
+              <div className="flex justify-end py-1">
                 <input
                   onChange={(e) =>
                     dispatch(Actions.changePercentileQuery(e.target.value))
                   }
                   type="number"
-                  className="w-16 pr-1 pl-3 py-1 ring-0 ml-2 text-sm input-shadow appearance-none leading-tight bg-slate-900 font-bold transition-all  text-white rounded-lg block"
+                  className="h-6 w-16 pr-1 pl-3 py-1 ring-0 ml-2 text-sm input-shadow appearance-none leading-tight bg-slate-900 font-bold transition-all  text-white rounded-lg block"
                   inputMode="decimal"
                   value={percentileQuery}
                 />
@@ -115,15 +145,15 @@ export default DiceStatsDisplay;
 // the appear-late class on the loading spinner is added to remove flicker in case of very fast updates < 70ms.
 const createCellsFromDices = (
   dices: Record<DiceIndex, JsDiceMaterialized | undefined>,
-  displayFunction: (dice: JsDiceMaterialized) => string | undefined
+  displayFunction: (dice: JsDiceMaterialized, diceIndex: DiceIndex) => any
 ) =>
   ALL_DICE_INDICES.map((i) => dices[i]).map((e, i) =>
     e === undefined ? (
       <td key={i}></td>
     ) : (
-      <td key={i}>
-        {displayFunction(e) || (
-          <div className="appear-later">
+      <td key={i} className="text-center">
+        {displayFunction(e, i as DiceIndex) || (
+          <div className="appear-later flex items-center justify-center">
             <LoadingSpinner className="text-slate-900 fill-gray-300"></LoadingSpinner>
           </div>
         )}
@@ -133,10 +163,16 @@ const createCellsFromDices = (
 
 const createHeaderCellsFromDices = (
   dices: Record<DiceIndex, JsDiceMaterialized | undefined>,
-  displayFunction: (dice: JsDiceMaterialized) => string | undefined
+  displayFunction: (dice: JsDiceMaterialized, diceIndex: DiceIndex) => any
 ) =>
   ALL_DICE_INDICES.map((i) => dices[i]).map((e, i) =>
-    e === undefined ? <th key={i}></th> : <th key={i}>{displayFunction(e)}</th>
+    e === undefined ? (
+      <th key={i}></th>
+    ) : (
+      <th key={i} className="text-center">
+        {displayFunction(e, i as DiceIndex)}
+      </th>
+    )
   );
 
 const formatFraction = (fraction: { string: string; float: number }) =>

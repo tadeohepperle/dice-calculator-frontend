@@ -12,6 +12,7 @@ import {
 } from "../../logic/redux/state";
 import { Actions } from "../../logic/redux/actions";
 import { ALL_DICE_INDICES } from "../../logic/data_types";
+import { useState } from "react";
 
 interface Props {
   diceIndex: 0 | 1 | 2;
@@ -20,16 +21,18 @@ interface Props {
 
 const DiceInputSegment = (props: Props) => {
   const { diceIndex, calculationState } = props;
-  const {
-    segment: { inputValue, rollManyNumber },
-    inputSegmentCount,
-  } = useSelector((state: AppState) => {
-    let segment = state.inputSegments[diceIndex]!;
+
+  const [rollManyNumber, setRollManyNumber] = useState(100);
+  const [inputValue, setInputValue] = useState("max(d100,d200)");
+  const [inputChanged, setInputChanged] = useState(true);
+
+  const { inputSegmentCount } = useSelector((state: AppState) => {
     let inputSegmentCount = numberOfInputSegments(state);
 
-    return { segment, inputSegmentCount };
+    return { inputSegmentCount };
   });
   const dispatch = useDispatch();
+
   let color: UIColor = diceIndexToUiColor(props.diceIndex);
   return (
     <div className="mt-5 pb-2.5 relative">
@@ -45,7 +48,8 @@ const DiceInputSegment = (props: Props) => {
             placeholder="2d6"
             value={inputValue}
             onChange={(value) => {
-              dispatch(Actions.changeInput(diceIndex, value));
+              setInputValue(value);
+              setInputChanged(true);
             }}
           ></InputField>
         </div>
@@ -73,9 +77,12 @@ const DiceInputSegment = (props: Props) => {
           uiColor={color}
           title="Calculate Distribution"
           onClick={
-            calculationState.type == "newinput"
+            inputChanged
               ? () => {
-                  dispatch(Actions.calculateDistribution(diceIndex));
+                  setInputChanged(false);
+                  dispatch(
+                    Actions.calculateDistribution(diceIndex, inputValue)
+                  );
                 }
               : null
           }
@@ -105,7 +112,7 @@ const DiceInputSegment = (props: Props) => {
           uiColor={color}
           title="Roll"
           onChangeNumber={(n) => {
-            dispatch(Actions.changeRollManyNumber(diceIndex, n));
+            setRollManyNumber(n);
           }}
           onClick={
             calculationState.type == "done"

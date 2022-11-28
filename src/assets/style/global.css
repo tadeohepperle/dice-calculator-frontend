@@ -17,7 +17,7 @@
 }
 
 .input-shadow {
-  box-shadow: 0 0px 4px 8px rgba(156, 208, 255, 0.1);
+  box-shadow: 0 0px 3px 6px rgba(156, 208, 255, 0.08);
   outline: none;
 }
 
