@@ -50,15 +50,22 @@ export type RollResult =
   | { type: "many"; numbers: number[] };
 
 export type DistributionChartData = {
+  min: number; // where values of the distribution start, e.g. 2 for 2d6
+  max: number; // where values of the distribution end, e.g. 12 for 2d6
   availableDices: DiceIndex[];
+  diceInputStrings: {
+    [0]?: string;
+    [1]?: string;
+    [2]?: string;
+  };
   data: {
     title: string;
     [0]?: number;
     [1]?: number;
     [2]?: number;
-    d0_frac?: string;
-    d1_frac?: string;
-    d2_frac?: string;
+    r0?: string; // fraction string
+    r1?: string; // fraction string
+    r2?: string; // fraction string
   }[];
 };
 

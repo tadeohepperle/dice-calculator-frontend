@@ -22,7 +22,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { last } from "../../logic/utils";
+import { formatPercent, last } from "../../logic/utils";
 import { diceIndexToColor } from "./ui";
 
 export interface Props {}
@@ -37,30 +37,82 @@ const DiceChartDisplay = (props: Props) => {
     }
   );
 
-  const width = 200;
-  const height = 200;
-  const verticalMargin = 40;
+  const diceIndexToInputString = (i: DiceIndex): string =>
+    chartData![mode].diceInputStrings[i]!;
 
+  const lookUpFractionStringForToolTiop = (i: DiceIndex, n: number): string => {
+    let d = chartData![mode];
+    return d.data[n - d.min][`r${i}`] || "idk";
+  };
   return (
-    <div className=" text-white rounded" style={{ width: "100%", height: 300 }}>
+    <div
+      className="mt-6 text-white"
+      style={{ width: "100%", aspectRatio: "4/2" }}
+    >
       {chartData && (
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
-            width={500}
-            height={300}
             data={chartData[mode].data}
             margin={{
-              top: 5,
-              right: 30,
-              left: 20,
-              bottom: 5,
+              top: 0,
+              right: 8,
+              left: -20,
+              bottom: 0,
             }}
           >
-            {/* <CartesianGrid strokeDasharray="3 3" /> */}
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
+            {/* <CartesianGrid strokeDasharray="3 3" /s> */}
+            <XAxis dataKey="title" stroke="white" />
+            <YAxis stroke="white" />
+            <Tooltip
+              cursor={{
+                // stroke: "red",
+                // strokeWidth: 2,
+                stroke: "rgba(255,255,255,0.3)",
+              }}
+              contentStyle={{
+                background: "#0f172a",
+                borderRadius: "8px",
+                boxShadow: "0 5px 5px rgba(0, 0, 0, 0.25)",
+                border: "none",
+              }}
+              labelFormatter={(label) => (
+                <span className="font-bold">{label}</span>
+              )}
+              // @ts-ignore
+              formatter={(value, diceIndex, props) => {
+                // @ts-ignore
+                let v = formatPercent(value);
+                // @ts-ignore
+                let rollValue = parseInt(props.payload.title);
+
+                let frac = lookUpFractionStringForToolTiop(
+                  diceIndex as DiceIndex,
+                  rollValue
+                );
+                return [
+                  <>
+                    <span>
+                      {v} <span className="ml-2 text-gray-400">({frac})</span>
+                    </span>
+                  </>,
+
+                  diceIndexToInputString(diceIndex as DiceIndex),
+                ];
+              }}
+            />
+            <Legend
+              payload={chartData[mode].availableDices.map((i) => ({
+                color: diceIndexToColor(i),
+                value: diceIndexToInputString(i),
+                type: "triangle",
+                id: i.toString(),
+              }))}
+              // // wrapperStyle={{ top: 300 }}
+              // content={(props) => {
+              //   console.log("props", props);
+              //   return <div>Hehe</div>;
+              // }}
+            />
             {chartData[mode].availableDices.map((i) => (
               <Bar key={i} dataKey={i} fill={diceIndexToColor(i)} />
             ))}

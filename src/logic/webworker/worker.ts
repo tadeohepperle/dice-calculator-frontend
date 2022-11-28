@@ -276,7 +276,7 @@ function calculateChartData(): PdfAndCdfDistributionChartData | undefined {
   // go over cdf to fill in missing values:
   let lastVal: Map<DiceIndex, JsFractionMaterialized | undefined> = new Map();
   for (const diceIndex of RELEVANT_DICE_INDICES) {
-    lastVal.set(diceIndex, undefined);
+    lastVal.set(diceIndex, { string: "0", float: 0.0 });
   }
   for (let i = min; i <= max; i++) {
     let cdfMapRef = cdfAgg.get(i);
@@ -324,21 +324,29 @@ function transformHashMapToChartData(
         [0]?: number;
         [1]?: number;
         [2]?: number;
-        d0_frac?: string;
-        d1_frac?: string;
-        d2_frac?: string;
+        r0?: string;
+        r1?: string;
+        r2?: string;
       } = {
-        title: `Number ${i}`,
+        title: `${i}`,
       };
       for (const diceIndex of availableDices) {
         let fracMat = hashmap.get(i)?.get(diceIndex);
         o[diceIndex] = fracMat?.float;
-        o[`d${diceIndex}_frac`] = fracMat?.string;
+        o[`r${diceIndex}`] = fracMat?.string;
       }
       return o;
     });
+
+  const diceInputStrings: Partial<Record<DiceIndex, string>> = {};
+  availableDices.forEach(
+    (i) => (diceInputStrings[i] = diceCache[i]![2].original_builder_string)
+  );
   return {
     availableDices,
     data,
+    diceInputStrings,
+    min,
+    max,
   };
 }
