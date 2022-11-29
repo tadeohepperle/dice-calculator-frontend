@@ -1,11 +1,21 @@
 ---
+import { ALL_DICE_INDICES } from "../logic/data_types";
+
 export interface Props {
   items: [string] | [string, string] | [string, string, string];
   subtitle: string;
 }
 const { items, subtitle } = Astro.props;
 let sidelineClassIndex = items.length - 1;
-let href = `?dices=${items.join("|")}`; // TODO
+let hrefElements = [`?`];
+ALL_DICE_INDICES.forEach((i) => {
+  if (items[i]) {
+    hrefElements.push(`d${i + 1}=${items[i]}`);
+    hrefElements.push(`&`);
+  }
+});
+hrefElements.pop();
+const href = hrefElements.join("");
 ---
 
 <a href={href} class="group">

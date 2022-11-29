@@ -10,7 +10,12 @@ import {
 } from "../../logic/data_types";
 import { Actions } from "../../logic/redux/actions";
 import type { AppState } from "../../logic/redux/state";
-import { formatFloat, formatFraction } from "../../logic/utils";
+import {
+  formatFloat,
+  formatFloatForPercent,
+  formatFraction,
+  formatPercent,
+} from "../../logic/utils";
 import SmallSelect from "./SmallSelect";
 import { diceIndexToColor } from "./ui";
 import LoadingSpinner from "./utility/LoadingSpinner";
@@ -43,8 +48,14 @@ const DiceStatsDisplay = (props: Props) => {
   ).length;
   const dispatch = useDispatch();
 
-  const formatFunction: (fraction: JsFractionMaterialized) => string =
+  const formatFunctionValue: (fraction: JsFractionMaterialized) => string =
     numberMode === "fraction" ? formatFraction : (v) => formatFloat(v.float, 2);
+  const formatFunctionProbability: (
+    fraction: JsFractionMaterialized
+  ) => string =
+    numberMode === "fraction"
+      ? formatFraction
+      : (v) => formatPercent(v.float, 2);
   return (
     <div
       // min-w-min
@@ -106,13 +117,13 @@ const DiceStatsDisplay = (props: Props) => {
           <tr className="bg-slate-600">
             <th className="text-right pr-3 py-1">Mean</th>
             {createCellsFromDices(computedDices, numDices, (d) =>
-              formatFunction(d.mean)
+              formatFunctionValue(d.mean)
             )}
           </tr>
           <tr>
             <th className="text-right pr-3 py-1">Variance</th>
             {createCellsFromDices(computedDices, numDices, (d) =>
-              formatFunction(d.variance)
+              formatFunctionValue(d.variance)
             )}
           </tr>
 
@@ -144,7 +155,7 @@ const DiceStatsDisplay = (props: Props) => {
             </th>
             {createCellsFromDices(computedDices, numDices, (d) => {
               let frac = d.probabilityQuery.result?.[comparatorMode];
-              return frac && formatFunction(frac);
+              return frac && formatFunctionProbability(frac);
             })}
           </tr>
           <tr>

@@ -66,7 +66,7 @@ const DiceChartDisplay = (props: Props) => {
             margin={{
               top: 0,
               right: 8,
-              left: -20,
+              left: -10,
               bottom: 0,
             }}
           >

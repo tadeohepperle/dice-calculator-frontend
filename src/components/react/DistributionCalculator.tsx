@@ -55,7 +55,7 @@ const DistributionCalculator = () => {
         ></DiceInputSegment>
       ))}
 
-      {segmentStates.length < 3 && (
+      {segmentStates.length < 3 ? (
         <IconButton
           className={"mt-5"}
           uiColor={UIColor.Ghost}
@@ -66,6 +66,8 @@ const DistributionCalculator = () => {
           }}
           grow="none"
         ></IconButton>
+      ) : (
+        <div className="h-10"></div>
       )}
       {numDicesCalculated > 0 && (
         <div className="block lg:flex lg:flex-wrap lg-flex-reverse">
