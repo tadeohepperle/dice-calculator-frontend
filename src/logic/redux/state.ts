@@ -1,3 +1,4 @@
+import type { InitSettings } from "./../data_types";
 import {
   ALL_DICE_INDICES,
   DiceIndex,
@@ -15,7 +16,7 @@ export type CalculationState =
 
 export interface DiceInputSegmentState {
   diceIndex: DiceIndex;
-  inputValue: string;
+  initialInput: string;
   rollResult?: RollResult;
   rolledNumber?: number;
   rolledNumbers?: number[];
@@ -39,23 +40,48 @@ export interface AppState {
   chartData: PdfAndCdfDistributionChartData | undefined;
 }
 
-export const initialState: AppState = {
-  segmentDisplayOrder: [0],
-  inputSegments: {
-    0: {
-      diceIndex: 0,
-      inputValue: "2d20",
-      calculationState: { type: "newinput" },
-      rollManyNumber: 100,
-    },
-  },
-  computedDices: { 0: undefined, 1: undefined, 2: undefined },
-  percentileQuery: "90",
-  probabilityQuery: "6",
-  probabilityQueryMode: "lte",
-  chartData: undefined,
-};
+export const INITIAL_DICE_0_INPUT = "2d20";
 
+export function initSettingsToInitialState(
+  initSettings: InitSettings | undefined
+): AppState {
+  let segmentDisplayOrder: DiceIndex[] = [0];
+  if (initSettings?.[1]) segmentDisplayOrder.push(1);
+  if (initSettings?.[2]) segmentDisplayOrder.push(2);
+  return {
+    segmentDisplayOrder,
+    inputSegments: {
+      0: {
+        diceIndex: 0,
+        initialInput: initSettings?.[0] || INITIAL_DICE_0_INPUT,
+        calculationState: { type: "newinput" },
+        rollManyNumber: 100,
+      },
+      1: initSettings?.[1]
+        ? {
+            diceIndex: 1,
+            initialInput: initSettings?.[1],
+            calculationState: { type: "newinput" },
+            rollManyNumber: 100,
+          }
+        : undefined,
+      2: initSettings?.[2]
+        ? {
+            diceIndex: 2,
+            initialInput: initSettings?.[2],
+            calculationState: { type: "newinput" },
+            rollManyNumber: 100,
+          }
+        : undefined,
+    },
+    // todo rename to init and inject into components
+    computedDices: { 0: undefined, 1: undefined, 2: undefined },
+    percentileQuery: initSettings?.perc?.toString() || "90",
+    probabilityQuery: initSettings?.prob?.toString() || "6",
+    probabilityQueryMode: initSettings?.cmpMode || "eq",
+    chartData: undefined,
+  };
+}
 ////////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////

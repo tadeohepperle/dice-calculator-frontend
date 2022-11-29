@@ -74,10 +74,21 @@ export type PdfAndCdfDistributionChartData = {
   cdf: DistributionChartData;
 };
 
-// {
-//   cdf:
-//   pdf:
-// }
+export type ComparatorMode = "lt" | "lte" | "eq" | "gte" | "gt";
+export type NumberMode = "fraction" | "float";
+
+export type ChartMode = "cdf" | "pdf";
+
+export type InitSettings = {
+  0?: string;
+  1?: string;
+  2?: string;
+  perc: number;
+  prob: number;
+  cmpMode: ComparatorMode;
+  numberMode: NumberMode;
+  chartMode: ChartMode;
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS

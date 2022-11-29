@@ -1,4 +1,8 @@
-import type { PdfAndCdfDistributionChartData } from "./../data_types";
+import type { Actions } from "./../redux/actions";
+import type {
+  PdfAndCdfDistributionChartData,
+  RollResult,
+} from "./../data_types";
 import { JsDice } from "dices";
 import type { DiceIndex, JsDiceMaterialized } from "../data_types";
 import { WorkerMessages } from "./worker_messages";
@@ -33,7 +37,7 @@ export async function wasmComputeDice(
   percentileQuery: number | undefined,
   probabilityQuery: number | undefined
 ): Promise<[JsDiceMaterialized, PdfAndCdfDistributionChartData | "unchanged"]> {
-  ensureWorkerIsPresent();
+  await ensureWorkerIsPresent();
   const message = WorkerMessages.calculateMessage(
     diceIndex,
     input,
@@ -53,7 +57,7 @@ export async function wasmComputeDice(
 export async function wasmComputeProbabilities(
   probabilityQuery: number
 ): Promise<WorkerMessages.CalculateProbabilityResponse["payload"]> {
-  ensureWorkerIsPresent();
+  await ensureWorkerIsPresent();
   let message = WorkerMessages.calculateProbabilityMessage([
     { diceIndex: 0, probabilityQuery },
     { diceIndex: 1, probabilityQuery },
@@ -71,7 +75,7 @@ export async function wasmComputeProbabilities(
 export async function wasmComputePercentiles(
   percentileQuery: number
 ): Promise<WorkerMessages.CalculatePerccentileResponse["payload"]> {
-  ensureWorkerIsPresent();
+  await ensureWorkerIsPresent();
   let message = WorkerMessages.calculatePerccentileMessage([
     { diceIndex: 0, percentileQuery },
     { diceIndex: 1, percentileQuery },
@@ -93,7 +97,7 @@ export async function wasmComputePercentiles(
 export async function wasmRemoveDice(
   diceIndex: DiceIndex
 ): Promise<PdfAndCdfDistributionChartData | "unchanged" | undefined> {
-  ensureWorkerIsPresent();
+  await ensureWorkerIsPresent();
   const message = WorkerMessages.removeDiceMessage(diceIndex);
   const { payload } = await postMessageAndAwaitResponse<
     WorkerMessages.RemoveDiceMessage,
@@ -101,6 +105,18 @@ export async function wasmRemoveDice(
   >(worker!, message);
 
   return payload.chartData;
+}
+
+export async function wasmRoll(
+  rollPayload: Actions.RollPayload
+): Promise<RollResult> {
+  await ensureWorkerIsPresent();
+  const message = WorkerMessages.rollMessage(rollPayload);
+  const { payload } = await postMessageAndAwaitResponse<
+    WorkerMessages.RollMessage,
+    WorkerMessages.RollResponse
+  >(worker!, message);
+  return payload;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -135,19 +151,41 @@ function postMessageAndAwaitResponse<
         }
       };
       worker.addEventListener("message", listener, false);
+
       const packedMessage: WorkerMessages.PackedWorkerMessage<M> = {
         id,
         message,
       };
       worker.postMessage(packedMessage);
     } catch (ex) {
+      console.error(ex);
       rej(ex);
     }
   });
 }
 
-function ensureWorkerIsPresent() {
+async function ensureWorkerIsPresent() {
   if (!worker) {
     throw "Cannot compute dice, because worker is not setup!";
   }
+  await waitForWorkerSetupSuccess();
+}
+
+let workerSetupDone = false;
+function waitForWorkerSetupSuccess(): Promise<void> {
+  return new Promise((res, rej) => {
+    if (workerSetupDone) {
+      res();
+    } else {
+      const listener = function (e: MessageEvent<any>) {
+        let returnedData = e.data;
+        if (returnedData.id === 2) {
+          worker!.removeEventListener("message", listener, false);
+          workerSetupDone = true;
+          res();
+        }
+      };
+      worker!.addEventListener("message", listener, false);
+    }
+  });
 }

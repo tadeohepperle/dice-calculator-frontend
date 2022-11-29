@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   ALL_DICE_INDICES,
+  ComparatorMode,
   DiceIndex,
   JsDiceMaterialized,
   JsFractionMaterialized,
+  NumberMode,
 } from "../../logic/data_types";
 import { Actions } from "../../logic/redux/actions";
 import type { AppState } from "../../logic/redux/state";
@@ -15,8 +17,6 @@ import LoadingSpinner from "./utility/LoadingSpinner";
 
 export interface Props {}
 
-type ComparatorMode = "lt" | "lte" | "eq" | "gte" | "gt";
-type NumberMode = "fraction" | "float";
 const comparatorModeSymbolMap: Record<ComparatorMode, string> = {
   lt: "<",
   lte: "≤",
@@ -57,7 +57,7 @@ const DiceStatsDisplay = (props: Props) => {
       >
         <thead>
           <tr className="w-full">
-            <th className="py-2 text-end">
+            <th className="py-2 text-end min-w-1/2">
               <SmallSelect
                 value={numberMode}
                 onChange={(v) => setNumberMode(v as NumberMode)}
@@ -69,7 +69,10 @@ const DiceStatsDisplay = (props: Props) => {
             </th>
             {createHeaderCellsFromDices(computedDices, numDices, (d, i) => (
               <span className="px-3" style={{ color: diceIndexToColor(i) }}>
+                {numDices != 1 && spacer(6 - d.original_builder_string.length)}
                 {d.original_builder_string}
+                {numDices == 1 && spacer(10 - d.original_builder_string.length)}
+                {numDices != 1 && spacer(6 - d.original_builder_string.length)}
               </span>
             ))}
           </tr>
@@ -208,3 +211,11 @@ const createHeaderCellsFromDices = (
       </th>
     )
   );
+
+function spacer(nLetters: number) {
+  return (
+    <span className="select-none opacity-0">
+      {"S".repeat(Math.max(0, nLetters))}
+    </span>
+  );
+}

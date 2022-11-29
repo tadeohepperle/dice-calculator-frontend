@@ -83,6 +83,7 @@ onmessage = function (e) {
     postFail(id, ex);
   }
 };
+postMessage({ id: 2, type: "setupsuccess" });
 
 ////////////////////////////////////////////////////////////////////////////////
 // ACTION HANDLERS
@@ -142,7 +143,31 @@ function calculateHandler(
 function rollHandler(
   payload: WorkerMessages.RollMessage["payload"]
 ): WorkerMessages.RollResponse {
-  throw "not implemented";
+  let dice = diceCache[payload.diceIndex]?.[1];
+  if (!dice) {
+    throw `dice with diceIndex ${payload.diceIndex} cannot be found in diceCache.`;
+  }
+  switch (payload.mode.type) {
+    case "one": {
+      let num = dice.roll();
+      return {
+        type: "Roll",
+        payload: { type: "one", number: Number(num) },
+      };
+    }
+    case "many": {
+      let p = payload.mode as { type: "many"; amount: number };
+      let nums = dice.roll_many(p.amount);
+      let numbers: number[] = [];
+      nums.forEach((b) => {
+        numbers.push(Number(b));
+      });
+      return {
+        type: "Roll",
+        payload: { type: "many", numbers },
+      };
+    }
+  }
 }
 
 function calculateProbabilityHandler(

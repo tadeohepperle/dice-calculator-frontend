@@ -1,4 +1,7 @@
-import type { PdfAndCdfDistributionChartData } from "./../data_types";
+import type {
+  InitSettings,
+  PdfAndCdfDistributionChartData,
+} from "./../data_types";
 import {
   configureStore,
   Reducer,
@@ -12,6 +15,7 @@ import {
   wasmComputePercentiles,
   wasmComputeProbabilities,
   wasmRemoveDice,
+  wasmRoll,
 } from "../webworker/webworker_interface";
 import { ALL_DICE_INDICES, DiceIndex, JsDiceMaterialized } from "../data_types";
 import { Actions } from "./actions";
@@ -19,7 +23,8 @@ import {
   AppState,
   CalculationState,
   DiceInputSegmentState,
-  initialState,
+  INITIAL_DICE_0_INPUT,
+  initSettingsToInitialState,
 } from "./state";
 import type { ToolkitStore } from "@reduxjs/toolkit/dist/configureStore";
 import { SafeDispatchInRecuderMiddleware } from "./middleware";
@@ -56,30 +61,53 @@ const actionTypeFunctionMap: Record<
     ),
 };
 
+let cachedInitSettings: InitSettings | undefined = undefined;
 const rootReducer: Reducer<AppState, Actions.AppStateAction> = (
   state: AppState | undefined,
   action: Actions.AppStateAction
 ): AppState => {
   return !state
-    ? initialState
+    ? initSettingsToInitialState(cachedInitSettings)
     : actionTypeFunctionMap[action.type](state, action);
 };
 
 const safeDispatchMiddleware: SafeDispatchInRecuderMiddleware =
   new SafeDispatchInRecuderMiddleware();
-const _store = configureStore({
-  reducer: rootReducer,
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: false,
-    }).concat(safeDispatchMiddleware.createMiddlewareFunction()),
-});
+let _store: ToolkitStore;
 
-safeDispatchMiddleware.store = _store;
+export function configureStoreWithInitSettings(initSettings: InitSettings) {
+  cachedInitSettings = initSettings;
+  _store = configureStore({
+    reducer: rootReducer,
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        serializableCheck: false,
+      }).concat(safeDispatchMiddleware.createMiddlewareFunction()),
+    // preloadedState: initialState,
+  });
 
-export const store = _store;
+  safeDispatchMiddleware.store = _store;
+
+  // perform initial wasm calculations on page load
+  ALL_DICE_INDICES.forEach((i) => {
+    if (initSettings[i] !== undefined || i === 0) {
+      safeDispatchMiddleware.dispatch(
+        Actions.calculateDistribution(
+          i,
+          initSettings[i] ?? INITIAL_DICE_0_INPUT
+        )
+      );
+    }
+  });
+
+  return _store;
+}
+
+// export function setUpStoreWithInitialSettings();
+
+// export const store = _store;
 export type RootState = ReturnType<typeof rootReducer>;
-export type AppDispatch = typeof store.dispatch;
+// export type AppDispatch = typeof store.dispatch;
 
 ////////////////////////////////////////////////////////////////////////////////
 // INDIVIDUAL REDUCER FUNCTIONS
@@ -131,7 +159,7 @@ function addDiceReducer(
 
     let seg: DiceInputSegmentState = {
       diceIndex: firstFreeIndex,
-      inputValue: "",
+      initialInput: "",
       calculationState: { type: "error", message: "" },
       rollManyNumber: 100,
     };
@@ -188,6 +216,7 @@ function calculateDistributionReducer(
 }
 
 function rollReducer(state: AppState, payload: Actions.RollPayload): AppState {
+  wasmRoll(payload).then((r) => console.log(r));
   return state;
 }
 

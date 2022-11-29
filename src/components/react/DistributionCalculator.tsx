@@ -1,5 +1,11 @@
 import { Provider, useDispatch, useSelector } from "react-redux";
-import { ALL_DICE_INDICES, DiceIndex } from "../../logic/data_types";
+import {
+  ALL_DICE_INDICES,
+  ChartMode,
+  ComparatorMode,
+  DiceIndex,
+  NumberMode,
+} from "../../logic/data_types";
 import { Actions } from "../../logic/redux/actions";
 import type { AppState, CalculationState } from "../../logic/redux/state";
 import DiceInputSegment from "./DiceInputSegment";
@@ -10,35 +16,30 @@ import IconButton from "./IconButton";
 import InputField from "./InputField";
 
 import { UIColor, Icons } from "./ui";
+import { useEffect } from "react";
 
 const DistributionCalculator = () => {
   const [segmentStates, numDicesCalculated]: [
     {
       diceIndex: DiceIndex;
       calculationState: CalculationState;
+      initialInput: string;
     }[],
     number
   ] = useSelector((state: AppState) => {
     const segmentStates: {
       diceIndex: DiceIndex;
       calculationState: CalculationState;
+      initialInput: string;
     }[] = state.segmentDisplayOrder.map((i) => {
-      const { diceIndex, calculationState } = state.inputSegments[i]!;
-      return { diceIndex, calculationState };
+      const { diceIndex, calculationState, initialInput } =
+        state.inputSegments[i]!;
+      return { diceIndex, calculationState, initialInput };
     });
 
     const numDicesCalculated = ALL_DICE_INDICES.filter(
       (i) => state.computedDices[i]
     ).length;
-
-    const distributionsArr = ALL_DICE_INDICES.map((i) =>
-      state.computedDices[i] === undefined
-        ? undefined
-        : {
-            cdf: state.computedDices[i]!.cumulative_distribution,
-            pdf: state.computedDices[i]!.distribution,
-          }
-    );
 
     return [segmentStates, numDicesCalculated];
   });
@@ -47,6 +48,7 @@ const DistributionCalculator = () => {
     <div>
       {segmentStates.map((e) => (
         <DiceInputSegment
+          initialInput={e.initialInput}
           key={e.diceIndex}
           diceIndex={e.diceIndex}
           calculationState={e.calculationState}

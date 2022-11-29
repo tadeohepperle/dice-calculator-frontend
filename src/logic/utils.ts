@@ -60,3 +60,12 @@ export function formatFloat(float: number, prec: number = 2): string {
 }
 export const formatFraction = (fraction: { string: string; float: number }) =>
   fraction.string;
+
+export function asOrUndefined<T>(value: any, allValues: T[]): T | undefined {
+  return allValues.find((e) => e == value) || undefined;
+}
+
+export function orUndef<T, R>(func: (arg0: T) => R) {
+  return (arg0: T | undefined | null) =>
+    !arg0 && arg0 !== 0 ? undefined : func(arg0);
+}

@@ -17,13 +17,14 @@ import { useState } from "react";
 interface Props {
   diceIndex: 0 | 1 | 2;
   calculationState: CalculationState;
+  initialInput?: string;
 }
 
 const DiceInputSegment = (props: Props) => {
   const { diceIndex, calculationState } = props;
 
   const [rollManyNumber, setRollManyNumber] = useState(100);
-  const [inputValue, setInputValue] = useState("max(d100,d200)");
+  const [inputValue, setInputValue] = useState(props.initialInput || "");
   const [inputChanged, setInputChanged] = useState(true);
 
   const { inputSegmentCount } = useSelector((state: AppState) => {
@@ -91,20 +92,26 @@ const DiceInputSegment = (props: Props) => {
           grow="dominant"
         ></IconButton>
         <div className="basis-full xs:basis-auto xs:mr-5"></div>
-        <IconButton
-          className={"mt-5"}
-          uiColor={color}
-          title="Roll"
-          onClick={
-            calculationState.type == "done"
-              ? () => {
-                  dispatch(Actions.rollOne(diceIndex));
-                }
-              : null
-          }
-          icon={Icons.d20}
-          grow="normal"
-        ></IconButton>
+        <div>
+          <IconButton
+            className={"mt-5"}
+            uiColor={color}
+            title="Roll"
+            onClick={
+              calculationState.type == "done"
+                ? () => {
+                    dispatch(Actions.rollOne(diceIndex));
+                  }
+                : null
+            }
+            icon={Icons.d20}
+            grow="normal"
+          ></IconButton>
+          {/* <div className="w-full b text-xl text-white bg-slate-900 thick-shadow">
+            20
+          </div> */}
+        </div>
+
         <div className="mr-5"></div>
         <IconButtonWithNumber
           className={"mt-5"}

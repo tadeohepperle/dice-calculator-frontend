@@ -2,6 +2,7 @@ import { useSelector } from "react-redux";
 import type {
   ALL_DICE_INDICES,
   DiceIndex,
+  ChartMode,
   Distribution,
   JsDiceMaterialized,
   JsFractionMaterialized,
@@ -28,10 +29,8 @@ import SmallSelect from "./SmallSelect";
 
 export interface Props {}
 
-type DisplayMode = "cdf" | "pdf";
-
 const DiceChartDisplay = (props: Props) => {
-  let [mode, setMode] = useState<DisplayMode>("pdf");
+  let [mode, setMode] = useState<ChartMode>("pdf");
   const chartData: PdfAndCdfDistributionChartData | undefined = useSelector(
     (state: AppState) => {
       return state.chartData;
@@ -57,7 +56,7 @@ const DiceChartDisplay = (props: Props) => {
             ["pdf", "pmf"],
             ["cdf", "cdf"],
           ]}
-          onChange={(e) => setMode(e as DisplayMode)}
+          onChange={(e) => setMode(e as ChartMode)}
         ></SmallSelect>
       </div>
       {chartData && (
