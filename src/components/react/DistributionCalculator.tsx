@@ -12,12 +12,12 @@ import InputField from "./InputField";
 import { UIColor, Icons } from "./ui";
 
 const DistributionCalculator = () => {
-  const [segmentStates, atLeastOneDiceCalculated]: [
+  const [segmentStates, numDicesCalculated]: [
     {
       diceIndex: DiceIndex;
       calculationState: CalculationState;
     }[],
-    boolean
+    number
   ] = useSelector((state: AppState) => {
     const segmentStates: {
       diceIndex: DiceIndex;
@@ -27,9 +27,9 @@ const DistributionCalculator = () => {
       return { diceIndex, calculationState };
     });
 
-    const atLeastOneDiceCalculated = ALL_DICE_INDICES.some(
+    const numDicesCalculated = ALL_DICE_INDICES.filter(
       (i) => state.computedDices[i]
-    );
+    ).length;
 
     const distributionsArr = ALL_DICE_INDICES.map((i) =>
       state.computedDices[i] === undefined
@@ -40,7 +40,7 @@ const DistributionCalculator = () => {
           }
     );
 
-    return [segmentStates, atLeastOneDiceCalculated];
+    return [segmentStates, numDicesCalculated];
   });
   const dispatch = useDispatch();
   return (
@@ -65,12 +65,14 @@ const DistributionCalculator = () => {
           grow="none"
         ></IconButton>
       )}
-      {atLeastOneDiceCalculated && (
-        <div>
+      {numDicesCalculated > 0 && (
+        <div className="block lg:flex lg:flex-wrap lg-flex-reverse">
+          <div className="w-full"></div>
           <DiceChartDisplay></DiceChartDisplay>
           <DiceStatsDisplay></DiceStatsDisplay>
         </div>
       )}
+      <div className="h-40"></div>
     </div>
   );
 };

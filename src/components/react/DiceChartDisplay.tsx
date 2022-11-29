@@ -46,8 +46,8 @@ const DiceChartDisplay = (props: Props) => {
   };
   return (
     <div
-      className="mt-6 text-white"
-      style={{ width: "100%", aspectRatio: "4/2" }}
+      className="mt-6 text-white w-full"
+      style={{ aspectRatio: "4/2", maxHeight: 300 }}
     >
       {chartData && (
         <ResponsiveContainer width="100%" height="100%">
