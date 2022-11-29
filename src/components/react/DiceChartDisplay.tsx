@@ -24,13 +24,14 @@ import {
 } from "recharts";
 import { formatPercent, last } from "../../logic/utils";
 import { diceIndexToColor } from "./ui";
+import SmallSelect from "./SmallSelect";
 
 export interface Props {}
 
 type DisplayMode = "cdf" | "pdf";
 
 const DiceChartDisplay = (props: Props) => {
-  let [mode, setMode] = useState<DisplayMode>("cdf");
+  let [mode, setMode] = useState<DisplayMode>("pdf");
   const chartData: PdfAndCdfDistributionChartData | undefined = useSelector(
     (state: AppState) => {
       return state.chartData;
@@ -46,9 +47,19 @@ const DiceChartDisplay = (props: Props) => {
   };
   return (
     <div
-      className="mt-6 text-white w-full"
+      className="mt-6 text-white w-full relative"
       style={{ aspectRatio: "4/2", maxHeight: 300 }}
     >
+      <div className="absolute -top-12 right-2 z-10">
+        <SmallSelect
+          value={mode}
+          data={[
+            ["pdf", "pmf"],
+            ["cdf", "cdf"],
+          ]}
+          onChange={(e) => setMode(e as DisplayMode)}
+        ></SmallSelect>
+      </div>
       {chartData && (
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
@@ -98,19 +109,6 @@ const DiceChartDisplay = (props: Props) => {
                 ];
               }}
             />
-            {/* <Legend
-              payload={chartData[mode].availableDices.map((i) => ({
-                color: diceIndexToColor(i),
-                value: diceIndexToInputString(i),
-                type: "triangle",
-                id: i.toString(),
-              }))}
-              // // wrapperStyle={{ top: 300 }}
-              // content={(props) => {
-              //   console.log("props", props);
-              //   return <div>Hehe</div>;
-              // }}
-            /> */}
             {chartData[mode].availableDices.map((i) => (
               <Bar key={i} dataKey={i} fill={diceIndexToColor(i)} />
             ))}
