@@ -38,7 +38,11 @@ const DiceStatsDisplay = (props: Props) => {
   const dispatch = useDispatch();
   console.log(`${numDices * 200}px`);
   return (
-    <div className="mt-3 min-w-min flex justify-center md:justify-start">
+    <div
+      // min-w-min
+      className="mt-3 w-full flex justify-start md:justify-start"
+      style={{ overflowX: "auto" }}
+    >
       <table
         className="text-white table-auto "
         style={{ maxWidth: `${160 + numDices * 140}px` }}
@@ -169,7 +173,7 @@ const createHeaderCellsFromDices = (
     e === undefined ? (
       <th key={i}></th>
     ) : (
-      <th key={i} className="text-center">
+      <th key={i} className="text-center py-1">
         {displayFunction(e, i as DiceIndex)}
       </th>
     )
