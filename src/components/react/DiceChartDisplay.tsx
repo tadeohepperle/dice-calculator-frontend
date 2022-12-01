@@ -49,7 +49,6 @@ const DiceChartDisplay = (props: Props) => {
       className="mt-6 text-white w-full relative"
       style={{ aspectRatio: "4/2", maxHeight: 300 }}
     >
-      CHART
       <div className="absolute -top-12 right-2 z-10">
         <SmallSelect
           value={mode}

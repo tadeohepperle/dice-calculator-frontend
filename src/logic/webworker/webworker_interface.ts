@@ -3,13 +3,8 @@ import type {
   PdfAndCdfDistributionChartData,
   RollResult,
 } from "./../data_types";
-import { JsDice } from "dices";
 import type { DiceIndex, JsDiceMaterialized } from "../data_types";
 import { WorkerMessages } from "./worker_messages";
-
-// @ts-ignore
-// import Worker from "./worker.ts?worker";
-import { wait } from "../utils";
 
 ////////////////////////////////////////////////////////////////////////////////
 // SETUP WEB WORKER
