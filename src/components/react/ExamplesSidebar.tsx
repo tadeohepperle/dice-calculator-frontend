@@ -1,5 +1,4 @@
----
-import ExamplesSidebarEntry from "./ExamplesSidebarEntry.astro";
+import ExamplesSidebarEntry from "./ExamplesSidebarEntry";
 
 let examples: {
   items: [string] | [string, string] | [string, string, string];
@@ -37,17 +36,18 @@ let examples: {
   //  subtitle: "____"
   // },
 ];
----
 
-<div
-  class="bg-slate-900 rounded-tr-lg rounded-br-lg p-3 pb-5 thick-shadow mr-5"
->
-  <h2 class="text-2xl leading-none font-bold text-white">Examples</h2>
-  <div class="hidden md:block">
-    {
-      examples.map((e) => (
-        <ExamplesSidebarEntry subtitle={e.subtitle} items={e.items} />
-      ))
-    }
-  </div>
-</div>
+const ExamplesSideBar = () => {
+  return (
+    <div className="bg-slate-900 rounded-tr-lg rounded-br-lg p-3 pb-5 thick-shadow mr-5">
+      <h2 className="text-2xl leading-none font-bold text-white">Examples</h2>
+      <div className="hidden md:block">
+        {examples.map((e, i) => (
+          <ExamplesSidebarEntry key={i} subtitle={e.subtitle} items={e.items} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default ExamplesSideBar;

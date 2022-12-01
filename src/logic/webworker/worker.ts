@@ -83,6 +83,7 @@ onmessage = function (e) {
     postFail(id, ex);
   }
 };
+console.log("webworker: I am setup now");
 postMessage({ id: 2, type: "setupsuccess" });
 
 ////////////////////////////////////////////////////////////////////////////////

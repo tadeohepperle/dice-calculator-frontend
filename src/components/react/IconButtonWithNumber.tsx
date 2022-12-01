@@ -1,5 +1,3 @@
-import { faCalculator } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { UIColor, UIIcon } from "./ui";
 
 interface Props {

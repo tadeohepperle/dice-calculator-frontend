@@ -1,7 +1,7 @@
 import type { Action, Middleware } from "@reduxjs/toolkit";
 import type { ToolkitStore } from "@reduxjs/toolkit/dist/configureStore";
 import type { Actions } from "./actions";
-import type { RootState, store } from "./reducer";
+import type { RootState } from "./reducer";
 
 export class SafeDispatchInRecuderMiddleware {
   actionQueue: Actions.AppStateAction[];

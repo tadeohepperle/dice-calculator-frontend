@@ -21,6 +21,7 @@ function startOrRestartWorker() {
     worker.terminate();
   }
   worker = new Worker();
+  console.log("webworker started!");
 }
 
 if (window.Worker) {
@@ -38,6 +39,7 @@ export async function wasmComputeDice(
   probabilityQuery: number | undefined
 ): Promise<[JsDiceMaterialized, PdfAndCdfDistributionChartData | "unchanged"]> {
   await ensureWorkerIsPresent();
+  console.log("MAIN: wasmComputeDice started");
   const message = WorkerMessages.calculateMessage(
     diceIndex,
     input,
@@ -50,7 +52,7 @@ export async function wasmComputeDice(
   >(worker!, message);
 
   const { dice, chartData } = payload;
-
+  console.log("MAIN: wasmComputeDice returned", dice);
   return [dice, chartData];
 }
 
