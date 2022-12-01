@@ -1,3 +1,5 @@
+/// THIS FILE GETS COMPILED BY build_webworker.js into public/worker/worker.js (inlining the wasm)
+
 import type {
   DistributionChartData,
   PdfAndCdfDistributionChartData,
@@ -83,7 +85,7 @@ onmessage = function (e) {
     postFail(id, ex);
   }
 };
-console.log("webworker: I am setup now");
+console.log("webworker: I am setup now WASM :)");
 postMessage({ id: 2, type: "setupsuccess" });
 
 ////////////////////////////////////////////////////////////////////////////////

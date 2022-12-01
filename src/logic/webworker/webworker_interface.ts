@@ -7,7 +7,8 @@ import { JsDice } from "dices";
 import type { DiceIndex, JsDiceMaterialized } from "../data_types";
 import { WorkerMessages } from "./worker_messages";
 
-import Worker from "./worker.ts?worker";
+// @ts-ignore
+// import Worker from "./worker.ts?worker";
 import { wait } from "../utils";
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -16,12 +17,13 @@ import { wait } from "../utils";
 
 let worker: Worker | undefined;
 
+let workerSetupDone = false;
 function startOrRestartWorker() {
   if (worker) {
     worker.terminate();
   }
-  worker = new Worker();
-  console.log("webworker started!");
+  worker = new Worker("worker/worker.js", { type: "module" });
+  ensureWorkerIsPresent();
 }
 
 if (window.Worker) {
@@ -171,9 +173,9 @@ async function ensureWorkerIsPresent() {
     throw "Cannot compute dice, because worker is not setup!";
   }
   await waitForWorkerSetupSuccess();
+  console.log("MAIN: worker setup success");
 }
 
-let workerSetupDone = false;
 function waitForWorkerSetupSuccess(): Promise<void> {
   return new Promise((res, rej) => {
     if (workerSetupDone) {

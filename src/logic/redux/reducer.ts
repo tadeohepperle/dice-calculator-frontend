@@ -88,17 +88,17 @@ export function configureStoreWithInitSettings(initSettings: InitSettings) {
 
   safeDispatchMiddleware.store = _store;
 
-  // perform initial wasm calculations on page load
-  ALL_DICE_INDICES.forEach((i) => {
-    if (initSettings[i] !== undefined || i === 0) {
-      safeDispatchMiddleware.dispatch(
-        Actions.calculateDistribution(
-          i,
-          initSettings[i] ?? INITIAL_DICE_0_INPUT
-        )
-      );
-    }
-  });
+  // // perform initial wasm calculations on page load
+  // ALL_DICE_INDICES.forEach((i) => {
+  //   if (initSettings[i] !== undefined || i === 0) {
+  //     safeDispatchMiddleware.dispatch(
+  //       Actions.calculateDistribution(
+  //         i,
+  //         initSettings[i] ?? INITIAL_DICE_0_INPUT
+  //       )
+  //     );
+  //   }
+  // });
 
   return _store;
 }
