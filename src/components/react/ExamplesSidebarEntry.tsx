@@ -11,11 +11,12 @@ const ExamplesSidebarEntry = (props: Props) => {
   let hrefElements = [`?`];
   ALL_DICE_INDICES.forEach((i) => {
     if (items[i]) {
-      hrefElements.push(`d${i + 1}=${items[i]}`);
+      hrefElements.push(`d${i + 1}=${encodeURIComponent(items[i]!)}`);
       hrefElements.push(`&`);
     }
   });
   hrefElements.pop();
+  console.log(hrefElements);
   const href = hrefElements.join("");
   return (
     <a href={href} className="group">

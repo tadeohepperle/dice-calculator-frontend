@@ -24,13 +24,38 @@ let examples: {
     subtitle:
       "Comparing how the order of minimum and maximum changes the distribution",
   },
+  {
+    items: ["10d20"],
+    subtitle: "Approximation of normal distribution",
+  },
 
   {
     items: ["d2(d6)", "d6(d2)", "d4(d3)"],
     subtitle:
       "Rolling dice a number of times depending on the outcome of other dice",
   },
-
+  {
+    items: ["2d2*d3*10+(d10-d10)"],
+    subtitle: "A very funny distribution.",
+  },
+  {
+    items: ["d2*12+4d6", "8d3+16"],
+    subtitle:
+      "A bimodal distribution and a unimodal distribution with the same mean",
+  },
+  {
+    items: ["10x(max(min(12,d20),9))"],
+    subtitle: "Spiky distribution, looks like a hedgehog",
+  },
+  {
+    items: ["10x(max(min(56,d100),45))+d5"],
+    subtitle: "Jedi Temple",
+  },
+  {
+    items: ["d30xd30"],
+    subtitle:
+      "About the limit of computations. This takes about 30 seconds to compute.",
+  },
   // {
   //     items: ["___"],
   //  subtitle: "____"

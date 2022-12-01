@@ -25,9 +25,9 @@ export default DistributionCalculatorWrapper;
 function getInitSettingsFromURLParams(): InitSettings {
   const queryParams = new URLSearchParams(window.location.search);
   return {
-    [0]: queryParams.get("d1") || undefined,
-    [1]: queryParams.get("d2") || undefined,
-    [2]: queryParams.get("d3") || undefined,
+    [0]: orUndef(decodeURIComponent)(queryParams.get("d1")) || undefined,
+    [1]: orUndef(decodeURIComponent)(queryParams.get("d2")) || undefined,
+    [2]: orUndef(decodeURIComponent)(queryParams.get("d3")) || undefined,
     cmpMode:
       asOrUndefined<ComparatorMode>(queryParams.get("cmp"), [
         "eq",
