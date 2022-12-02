@@ -160,7 +160,7 @@ const DiceStatsDisplay = (props: Props) => {
           </tr>
           <tr>
             <th className="text-right pr-2 py-1">
-              Percentile
+              Percentile (%)
               <div className="flex justify-end py-1">
                 <input
                   onChange={(e) =>

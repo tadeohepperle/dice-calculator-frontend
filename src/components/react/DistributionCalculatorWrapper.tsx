@@ -9,10 +9,10 @@ import { configureStoreWithInitSettings } from "../../logic/redux/reducer";
 import { orUndef } from "../../logic/utils";
 import DistributionCalculator from "./DistributionCalculator";
 
-const DistributionCalculatorWrapper = () => {
-  const initSettings = getInitSettingsFromURLParams();
-  const store = configureStoreWithInitSettings(initSettings);
+const initSettings = getInitSettingsFromURLParams();
+const store = configureStoreWithInitSettings(initSettings);
 
+const DistributionCalculatorWrapper = () => {
   return (
     <Provider store={store}>
       <DistributionCalculator></DistributionCalculator>
@@ -44,7 +44,7 @@ function getInitSettingsFromURLParams(): InitSettings {
         "fraction",
         "float",
       ]) || "fraction",
-    perc: orUndef(parseFloat)(queryParams.get("perc")) || 6,
+    perc: orUndef(parseFloat)(queryParams.get("perc")) || 90,
     prob: orUndef(parseFloat)(queryParams.get("prob")) || 6,
   };
 }

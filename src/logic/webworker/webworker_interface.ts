@@ -36,7 +36,6 @@ export async function wasmComputeDice(
   probabilityQuery: number | undefined
 ): Promise<[JsDiceMaterialized, PdfAndCdfDistributionChartData | "unchanged"]> {
   await ensureWorkerIsPresent();
-  console.log("MAIN: wasmComputeDice started");
   const message = WorkerMessages.calculateMessage(
     diceIndex,
     input,
@@ -49,7 +48,6 @@ export async function wasmComputeDice(
   >(worker!, message);
 
   const { dice, chartData } = payload;
-  console.log("MAIN: wasmComputeDice returned", dice);
   return [dice, chartData];
 }
 
@@ -168,7 +166,6 @@ async function ensureWorkerIsPresent() {
     throw "Cannot compute dice, because worker is not setup!";
   }
   await waitForWorkerSetupSuccess();
-  console.log("MAIN: worker setup success");
 }
 
 function waitForWorkerSetupSuccess(): Promise<void> {

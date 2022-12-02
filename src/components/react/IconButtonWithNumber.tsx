@@ -19,7 +19,7 @@ const IconButtonWithNumber = (props: Props) => {
     <button
       onClick={active ? onClick : () => {}}
       className={`
-      ${!active ? " bg-gray-400 cursor-not-allowed" : ""}
+      ${!active ? " bg-gray-400 cursor-default" : ""}
       ${
         active && uiColor == UIColor.Primary
           ? " hover:bg-sky-100 bg-sky-200"

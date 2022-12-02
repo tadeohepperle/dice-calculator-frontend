@@ -88,17 +88,22 @@ export function configureStoreWithInitSettings(initSettings: InitSettings) {
 
   safeDispatchMiddleware.store = _store;
 
-  // // perform initial wasm calculations on page load
-  // ALL_DICE_INDICES.forEach((i) => {
-  //   if (initSettings[i] !== undefined || i === 0) {
-  //     safeDispatchMiddleware.dispatch(
-  //       Actions.calculateDistribution(
-  //         i,
-  //         initSettings[i] ?? INITIAL_DICE_0_INPUT
-  //       )
-  //     );
-  //   }
-  // });
+  // perform initial wasm calculations on page load
+  let numDices = ALL_DICE_INDICES.reduce(
+    (a: number, c) => (initSettings[c] !== undefined ? a + 1 : a),
+    0
+  );
+
+  ALL_DICE_INDICES.forEach((i) => {
+    if (initSettings[i] !== undefined || (numDices == 0 && i === 0)) {
+      safeDispatchMiddleware.dispatch(
+        Actions.calculateDistribution(
+          i,
+          initSettings[i] ?? INITIAL_DICE_0_INPUT
+        )
+      );
+    }
+  });
 
   return _store;
 }
@@ -191,13 +196,15 @@ function calculateDistributionReducer(
         isNaN(percentileQueryNum) ? undefined : percentileQueryNum,
         isNaN(probabilityQueryNum) ? undefined : probabilityQueryNum
       );
-      const reduction = (s: RootState): RootState => {
+      const reduction = (state: RootState): RootState => {
         let newState = updateCalculationStateInState(state, diceIndex, {
           type: "done",
         });
+
         if (chartData !== "unchanged") {
           newState = { ...newState, chartData };
         }
+        console.log(diceIndex, "gets done");
         return updateComputedDiceInState(newState, diceIndex, dice);
       };
       safeDispatchMiddleware.dispatch(Actions.rawReduction(reduction));
@@ -208,11 +215,9 @@ function calculateDistributionReducer(
     }
   })(diceIndex, input);
 
-  let seg: DiceInputSegmentState = {
-    ...state.inputSegments[diceIndex]!,
-    calculationState: { type: "calculating" },
-  };
-  return updateSegInState(state, diceIndex, seg);
+  return updateCalculationStateInState(state, diceIndex, {
+    type: "calculating",
+  });
 }
 
 function rollReducer(state: AppState, payload: Actions.RollPayload): AppState {

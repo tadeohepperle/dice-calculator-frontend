@@ -25,7 +25,7 @@ const DiceInputSegment = (props: Props) => {
 
   const [rollManyNumber, setRollManyNumber] = useState(100);
   const [inputValue, setInputValue] = useState(props.initialInput || "");
-  const [inputChanged, setInputChanged] = useState(true);
+  const [inputChanged, setInputChanged] = useState(false);
 
   const { inputSegmentCount } = useSelector((state: AppState) => {
     let inputSegmentCount = numberOfInputSegments(state);
@@ -37,12 +37,6 @@ const DiceInputSegment = (props: Props) => {
   let color: UIColor = diceIndexToUiColor(props.diceIndex);
   return (
     <div className="mt-5 pb-2.5 relative">
-      {/* {true && (
-        <div className="absolute -right-1 -top-1">
-          <CloseButton onChange={() => {}}></CloseButton>
-        </div>
-      )} */}
-
       <div className="flex">
         <div className="flex-grow">
           <InputField
@@ -78,7 +72,7 @@ const DiceInputSegment = (props: Props) => {
           uiColor={color}
           title="Calculate Distribution"
           onClick={
-            inputChanged
+            inputChanged && inputValue.length > 0
               ? () => {
                   setInputChanged(false);
                   dispatch(
@@ -131,6 +125,17 @@ const DiceInputSegment = (props: Props) => {
           icon={Icons.d20}
           grow="normal"
         ></IconButtonWithNumber>
+      </div>
+      <div className="mt-5 flex justify-center">
+        <div
+          className="mt-4 bg-slate-700 text-orange-200 p-3 w-40 
+          text-center text-4xl font-bold 
+        output-shadow rounded-3xl
+        border-1 border-white
+        "
+        >
+          7
+        </div>
       </div>
     </div>
   );

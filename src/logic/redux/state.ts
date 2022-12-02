@@ -45,18 +45,28 @@ export const INITIAL_DICE_0_INPUT = "2d20";
 export function initSettingsToInitialState(
   initSettings: InitSettings | undefined
 ): AppState {
-  let segmentDisplayOrder: DiceIndex[] = [0];
-  if (initSettings?.[1]) segmentDisplayOrder.push(1);
-  if (initSettings?.[2]) segmentDisplayOrder.push(2);
+  let segmentDisplayOrder: DiceIndex[] = [];
+  ALL_DICE_INDICES.forEach((i) => {
+    if (initSettings?.[i]) segmentDisplayOrder.push(i);
+  });
+  let needToInsertDefaultDiceAs0 = false;
+  if (segmentDisplayOrder.length == 0) {
+    segmentDisplayOrder = [0];
+    needToInsertDefaultDiceAs0 = true;
+  }
+
   return {
     segmentDisplayOrder,
     inputSegments: {
-      0: {
-        diceIndex: 0,
-        initialInput: initSettings?.[0] || INITIAL_DICE_0_INPUT,
-        calculationState: { type: "newinput" },
-        rollManyNumber: 100,
-      },
+      0:
+        initSettings?.[0] || needToInsertDefaultDiceAs0
+          ? {
+              diceIndex: 0,
+              initialInput: initSettings?.[0] || INITIAL_DICE_0_INPUT,
+              calculationState: { type: "newinput" },
+              rollManyNumber: 100,
+            }
+          : undefined,
       1: initSettings?.[1]
         ? {
             diceIndex: 1,

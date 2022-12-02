@@ -16,7 +16,6 @@ const ExamplesSidebarEntry = (props: Props) => {
     }
   });
   hrefElements.pop();
-  console.log(hrefElements);
   const href = hrefElements.join("");
   return (
     <a href={href} className="group">
