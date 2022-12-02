@@ -18,7 +18,7 @@ const InputField = (props: Props) => {
         leading-tight
         bg-slate-900 font-bold
         transition-all
-         text-white text-lg rounded-lg block w-full px-3 py-2 ring-0"
+         text-white text-lg rounded-xl block w-full px-3 py-2 ring-0"
         placeholder={props.placeholder}
         value={props.value}
       />

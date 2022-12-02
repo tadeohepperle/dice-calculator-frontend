@@ -85,7 +85,7 @@ onmessage = function (e) {
     postFail(id, ex);
   }
 };
-console.log("webworker: I am setup now WASM :)");
+console.log("WEBWORKER: now setup to do wasm computations. :)");
 postMessage({ id: 2, type: "setupsuccess" });
 
 ////////////////////////////////////////////////////////////////////////////////

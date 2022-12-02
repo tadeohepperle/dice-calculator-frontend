@@ -11,7 +11,7 @@ const LoadingSpinner = (props: Props) => {
       height={height || "20px"}
       width={width || "20px"}
       aria-hidden="true"
-      className={`animate-spin ${className || `text-slate-900 fill-gray-300`}`}
+      className={`animate-spin ${className || `text-slate-900 fill-slate-300`}`}
       viewBox="0 0 100 101"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

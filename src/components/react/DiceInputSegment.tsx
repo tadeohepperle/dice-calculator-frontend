@@ -11,8 +11,15 @@ import {
   numberOfInputSegments,
 } from "../../logic/redux/state";
 import { Actions } from "../../logic/redux/actions";
-import { ALL_DICE_INDICES } from "../../logic/data_types";
+import {
+  ALL_DICE_INDICES,
+  RollPayload,
+  RollResult,
+} from "../../logic/data_types";
 import { useState } from "react";
+import RollOutput from "./RollOutput";
+import { wait } from "../../logic/utils";
+import { wasmRoll } from "../../logic/webworker/webworker_interface";
 
 interface Props {
   diceIndex: 0 | 1 | 2;
@@ -23,9 +30,15 @@ interface Props {
 const DiceInputSegment = (props: Props) => {
   const { diceIndex, calculationState } = props;
 
-  const [rollManyNumber, setRollManyNumber] = useState(100);
+  const [rollManyNumber, setRollManyNumber] = useState<number>(100);
   const [inputValue, setInputValue] = useState(props.initialInput || "");
   const [inputChanged, setInputChanged] = useState(false);
+  const [rollResult, setRollResult] = useState<RollResult | undefined>(
+    undefined
+  );
+  const [animationState, setAnimationState] = useState<{ running: boolean }>({
+    running: false,
+  });
 
   const { inputSegmentCount } = useSelector((state: AppState) => {
     let inputSegmentCount = numberOfInputSegments(state);
@@ -33,6 +46,37 @@ const DiceInputSegment = (props: Props) => {
     return { inputSegmentCount };
   });
   const dispatch = useDispatch();
+
+  const roll = async (type: "one" | "many") => {
+    if (animationState.running) return;
+    setAnimationState({ running: true });
+    let payloadMode: RollPayload["mode"] = (() => {
+      switch (type) {
+        case "one":
+          return { type: "one" };
+        case "many":
+          return { type: "many", amount: rollManyNumber };
+      }
+    })();
+    try {
+      let result = await wasmRoll({ diceIndex, mode: payloadMode });
+      setRollResult(result);
+    } catch (ex) {
+      console.error(ex);
+    }
+
+    // dispatch(Actions.rollOne(diceIndex));
+    await wait(300);
+    setAnimationState({ running: false });
+    // {
+    //   type: "many",
+    //   numbers: [
+    //     1, 2, 4, 23, 7, 47, 33, 1, 2, 4, 23, 7, 47, 33, 1, 2, 4, 23, 7,
+    //     47, 33, 1, 2, 4, 23, 7, 47, 33, 1, 2, 4, 23, 7, 47, 33, 1, 2, 4,
+    //     23, 7, 47, 33, 1, 2, 4, 23, 7, 47, 33,
+    //   ],
+    // }
+  };
 
   let color: UIColor = diceIndexToUiColor(props.diceIndex);
   return (
@@ -45,6 +89,7 @@ const DiceInputSegment = (props: Props) => {
             onChange={(value) => {
               setInputValue(value);
               setInputChanged(true);
+              setRollResult(undefined);
             }}
           ></InputField>
         </div>
@@ -92,10 +137,8 @@ const DiceInputSegment = (props: Props) => {
             uiColor={color}
             title="Roll"
             onClick={
-              calculationState.type == "done"
-                ? () => {
-                    dispatch(Actions.rollOne(diceIndex));
-                  }
+              !inputChanged && calculationState.type == "done"
+                ? () => roll("one")
                 : null
             }
             icon={Icons.d20}
@@ -116,27 +159,23 @@ const DiceInputSegment = (props: Props) => {
             setRollManyNumber(n);
           }}
           onClick={
-            calculationState.type == "done"
-              ? () => {
-                  dispatch(Actions.rollMany(diceIndex, rollManyNumber));
-                }
+            !inputChanged && calculationState.type == "done"
+              ? () => roll("many")
               : null
           }
           icon={Icons.d20}
           grow="normal"
         ></IconButtonWithNumber>
       </div>
-      <div className="mt-5 flex justify-center">
+      {!inputChanged && rollResult !== undefined && (
         <div
-          className="mt-4 bg-slate-700 text-orange-200 p-3 w-40 
-          text-center text-4xl font-bold 
-        output-shadow rounded-3xl
-        border-1 border-white
-        "
+          className={`mt-7 flex justify-center ${
+            animationState.running ? "roll-animation" : ""
+          }`}
         >
-          7
+          <RollOutput uiColor={color} rollResult={rollResult}></RollOutput>
         </div>
-      </div>
+      )}
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import type { Actions } from "./../redux/actions";
 import type {
   PdfAndCdfDistributionChartData,
+  RollPayload,
   RollResult,
 } from "./../data_types";
 import type { DiceIndex, JsDiceMaterialized } from "../data_types";
@@ -104,9 +105,7 @@ export async function wasmRemoveDice(
   return payload.chartData;
 }
 
-export async function wasmRoll(
-  rollPayload: Actions.RollPayload
-): Promise<RollResult> {
+export async function wasmRoll(rollPayload: RollPayload): Promise<RollResult> {
   await ensureWorkerIsPresent();
   const message = WorkerMessages.rollMessage(rollPayload);
   const { payload } = await postMessageAndAwaitResponse<

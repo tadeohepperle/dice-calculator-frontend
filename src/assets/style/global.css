@@ -54,3 +54,29 @@
     opacity: 1;
   }
 }
+
+.roll-animation {
+  animation: roll 180ms ease-in-out 0ms;
+  animation-fill-mode: forwards;
+}
+
+@keyframes roll {
+  0% {
+    opacity: 100%;
+    transform: translate(0px, 0px);
+  }
+  16% {
+    transform: translate(5px, 5px);
+  }
+  50% {
+    transform: translate(-5px, -5px) rotateY(30deg);
+    opacity: 50%;
+  }
+  83% {
+    transform: translate(8px, 8px);
+  }
+  100% {
+    opacity: 100%;
+    transform: translate(0px, 0px);
+  }
+}

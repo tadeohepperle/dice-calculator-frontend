@@ -17,7 +17,6 @@ export namespace Actions {
     | DeleteDice
     | AddDice
     | CalculateDistribution
-    | Roll
     | AddErrorMessage
     | RawReduction
     | ChangeProbabilityQuery
@@ -59,24 +58,7 @@ export namespace Actions {
     };
   }
 
-  ////////////////////////////////////////////////////////////////////////////////
-
-  export interface RollPayload {
-    diceIndex: DiceIndex;
-    mode: { type: "one" } | { type: "many"; amount: number };
-  }
-  export interface Roll extends AbstractAppStateAction<RollPayload> {
-    type: "Roll";
-  }
-  export function rollOne(diceIndex: DiceIndex): Roll {
-    return { type: "Roll", payload: { diceIndex, mode: { type: "one" } } };
-  }
-  export function rollMany(diceIndex: DiceIndex, amount: number): Roll {
-    return {
-      type: "Roll",
-      payload: { diceIndex, mode: { type: "many", amount: amount } },
-    };
-  }
+  // ////////////////////////////////////////////////////////////////////////////////
 
   ////////////////////////////////////////////////////////////////////////////////
 

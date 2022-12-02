@@ -14,6 +14,20 @@ export function diceIndexToColor(i: DiceIndex): string {
   return ["#bae6fd", "#fecdd3", "#fed7aa"][i];
 }
 
+export const textColors: Record<UIColor, string> = {
+  [UIColor.Primary]: "text-sky-200 ",
+  [UIColor.Secondary]: "text-rose-200 ",
+  [UIColor.Tertiary]: "text-orange-200 ",
+  [UIColor.Ghost]: "text-slate-900",
+};
+
+export const bgColors: Record<UIColor, string> = {
+  [UIColor.Primary]: "bg-sky-200 ",
+  [UIColor.Secondary]: "bg-rose-200 ",
+  [UIColor.Tertiary]: "bg-orange-200 ",
+  [UIColor.Ghost]: "bg-slate-700",
+};
+
 export interface UIIcon {
   viewBox: string;
   d: string;

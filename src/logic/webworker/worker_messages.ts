@@ -4,6 +4,7 @@ import type {
   JsFractionMaterialized,
   PdfAndCdfDistributionChartData,
   ProbAll,
+  RollPayload,
   RollResult,
 } from "../data_types";
 import type { Actions } from "../redux/actions";
@@ -91,13 +92,12 @@ export namespace WorkerMessages {
   >;
 
   /// roll Dice:
-  export interface RollMessage
-    extends AbstractWorkerMessage<Actions.RollPayload> {
+  export interface RollMessage extends AbstractWorkerMessage<RollPayload> {
     type: "Roll";
   }
   export type RollResponse = AbstractWorkerResponse<RollResult, "Roll">;
 
-  export function rollMessage(rollPayload: Actions.RollPayload): RollMessage {
+  export function rollMessage(rollPayload: RollPayload): RollMessage {
     return {
       type: "Roll",
       payload: rollPayload,

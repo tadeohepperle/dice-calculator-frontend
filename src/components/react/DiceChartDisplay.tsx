@@ -100,7 +100,7 @@ const DiceChartDisplay = (props: Props) => {
                 return [
                   <>
                     <span>
-                      {v} <span className="ml-2 text-gray-400">({frac})</span>
+                      {v} <span className="ml-2 text-slate-400">({frac})</span>
                     </span>
                   </>,
 

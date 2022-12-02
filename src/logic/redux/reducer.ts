@@ -46,7 +46,6 @@ const actionTypeFunctionMap: Record<
       s,
       a.payload as Actions.CalculateDistributionPayload
     ),
-  Roll: (s, a) => rollReducer(s, a.payload as Actions.RollPayload),
   AddErrorMessage: (s, a) =>
     addErrorMessageReducer(s, a.payload as Actions.AddErrorMessagePayload),
   ChangeProbabilityQuery: (s, a) =>
@@ -204,7 +203,6 @@ function calculateDistributionReducer(
         if (chartData !== "unchanged") {
           newState = { ...newState, chartData };
         }
-        console.log(diceIndex, "gets done");
         return updateComputedDiceInState(newState, diceIndex, dice);
       };
       safeDispatchMiddleware.dispatch(Actions.rawReduction(reduction));
@@ -218,11 +216,6 @@ function calculateDistributionReducer(
   return updateCalculationStateInState(state, diceIndex, {
     type: "calculating",
   });
-}
-
-function rollReducer(state: AppState, payload: Actions.RollPayload): AppState {
-  wasmRoll(payload).then((r) => console.log(r));
-  return state;
 }
 
 function addErrorMessageReducer(

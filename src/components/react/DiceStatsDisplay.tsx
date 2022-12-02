@@ -17,7 +17,7 @@ import {
   formatPercent,
 } from "../../logic/utils";
 import SmallSelect from "./SmallSelect";
-import { diceIndexToColor } from "./ui";
+import { diceIndexToColor, diceIndexToUiColor, textColors } from "./ui";
 import LoadingSpinner from "./utility/LoadingSpinner";
 
 export interface Props {}
@@ -79,7 +79,7 @@ const DiceStatsDisplay = (props: Props) => {
               ></SmallSelect>
             </th>
             {createHeaderCellsFromDices(computedDices, numDices, (d, i) => (
-              <span className="px-3" style={{ color: diceIndexToColor(i) }}>
+              <span className={`px-3 ${textColors[diceIndexToUiColor(i)]}`}>
                 {numDices != 1 && spacer(6 - d.original_builder_string.length)}
                 {d.original_builder_string}
                 {numDices == 1 && spacer(10 - d.original_builder_string.length)}
@@ -198,7 +198,7 @@ const createCellsFromDices = (
       <td key={i} className={numDices > 1 ? "text-center" : "text-start pl-5"}>
         {displayFunction(e, i as DiceIndex) || (
           <div className="appear-later flex items-center justify-center">
-            <LoadingSpinner className="text-slate-900 fill-gray-300"></LoadingSpinner>
+            <LoadingSpinner className="text-slate-900 fill-slate-300"></LoadingSpinner>
           </div>
         )}
       </td>
