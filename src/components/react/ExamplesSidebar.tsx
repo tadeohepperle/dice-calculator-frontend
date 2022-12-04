@@ -65,7 +65,7 @@ let examples: {
 
 const ExamplesSideBar = () => {
   return (
-    <div className="output-shadow rounded-tr-2xl rounded-br-2xl p-3 pb-5 pr-5 thick-shadow mr-5">
+    <div className="output-shadow bg-slate-800 rounded-tr-2xl rounded-br-2xl p-3 pb-5 pr-5 thick-shadow mr-5">
       <h2 className="text-2xl leading-none font-bold text-white">Examples</h2>
       <div className="hidden md:block">
         {examples.map((e, i) => (

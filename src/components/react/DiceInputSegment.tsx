@@ -83,15 +83,25 @@ const DiceInputSegment = (props: Props) => {
     <div className="mt-5 pb-2.5 relative">
       <div className="flex">
         <div className="flex-grow">
-          <InputField
-            placeholder="2d6"
-            value={inputValue}
-            onChange={(value) => {
-              setInputValue(value);
-              setInputChanged(true);
-              setRollResult(undefined);
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (inputChanged && inputValue.length > 0) {
+                setInputChanged(false);
+                dispatch(Actions.calculateDistribution(diceIndex, inputValue));
+              }
             }}
-          ></InputField>
+          >
+            <InputField
+              placeholder="2d6"
+              value={inputValue}
+              onChange={(value) => {
+                setInputValue(value);
+                setInputChanged(true);
+                setRollResult(undefined);
+              }}
+            ></InputField>
+          </form>
         </div>
         {inputSegmentCount >= 2 && (
           <IconButton

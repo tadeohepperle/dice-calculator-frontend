@@ -4,7 +4,7 @@ const githubLink = "https://github.com/tadeohepperle";
 
 const HeaderPanel = () => {
   return (
-    <div className="thick-shadow hidden sm:flex w-full bg-slate-900 p-2 items-center shadow-md">
+    <div className="hidden sm:flex w-full bg-slate-800 output-shadow p-2 items-center ">
       <div className="text-slate-400 flex-grow">{titleText}</div>
       <div className="text-white">
         <a href={sourceCodeUrl} className="flex items-center">
