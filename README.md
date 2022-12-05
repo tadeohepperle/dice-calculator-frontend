@@ -1,3 +1,5 @@
+Hosted at: https://tadeohepperle.com/dice-calculator-frontend/
+
 # Advanced Dice Calculator and Dice Roller
 
 ## Technology:
