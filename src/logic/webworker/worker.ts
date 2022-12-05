@@ -124,6 +124,7 @@ function calculateHandler(
 
   // construct the dice, potentially resource intensive and could take several seconds, for example for 3d2000
   const dice = JsDice.build_from_string(input);
+  console.log("wprker", dice);
   const materialized = materializeJsDice(
     dice,
     probabilityQuery,
@@ -265,17 +266,21 @@ function calculateChartData(): PdfAndCdfDistributionChartData | undefined {
     return undefined;
   }
 
+  console.log("dist", diceCache[0]?.[2].distribution);
   let min = Math.min(
     ...RELEVANT_DICE_INDICES.map(
       (i) => diceCache[i]?.[2].distribution.values[0]?.[0] || Infinity
     )
   );
+  console.log("min", min);
 
   let max = Math.max(
     ...RELEVANT_DICE_INDICES.map(
       (i) => last(diceCache[i]?.[2].distribution.values)?.[0] || -Infinity
     )
   );
+
+  console.log("max", max);
 
   let pdfAgg: Map<number, Map<DiceIndex, JsFractionMaterialized>> = new Map();
   let cdfAgg: Map<number, Map<DiceIndex, JsFractionMaterialized>> = new Map();
@@ -297,6 +302,7 @@ function calculateChartData(): PdfAndCdfDistributionChartData | undefined {
       const [_, cdf_frac] =
         diceCache[diceIndex]![2].cumulative_distribution.values[i];
       // assert val === _
+      console.log("val", val);
       pdfAgg.get(val)!.set(diceIndex, pdf_frac);
       cdfAgg.get(val)!.set(diceIndex, cdf_frac);
     }
