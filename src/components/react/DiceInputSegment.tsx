@@ -66,7 +66,7 @@ const DiceInputSegment = (props: Props) => {
     }
 
     // dispatch(Actions.rollOne(diceIndex));
-    await wait(300);
+    await wait(200);
     setAnimationState({ running: false });
     // {
     //   type: "many",

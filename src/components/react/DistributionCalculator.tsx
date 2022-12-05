@@ -17,6 +17,7 @@ import InputField from "./InputField";
 
 import { UIColor, Icons } from "./ui";
 import { useEffect } from "react";
+import Explanation from "./Explanation";
 
 const DistributionCalculator = () => {
   const [segmentStates, numDicesCalculated]: [
@@ -76,6 +77,9 @@ const DistributionCalculator = () => {
           <DiceStatsDisplay></DiceStatsDisplay>
         </div>
       )}
+      <div>
+        <Explanation></Explanation>
+      </div>
       <div className="h-40"></div>
     </div>
   );

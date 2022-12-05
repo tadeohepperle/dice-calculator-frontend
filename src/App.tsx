@@ -1,5 +1,6 @@
 import DistributionCalculatorWrapper from "./components/react/DistributionCalculatorWrapper";
 import ExamplesSidebar from "./components/react/ExamplesSidebar";
+import Explanation from "./components/react/Explanation";
 import HeaderPanel from "./components/react/HeaderPanel";
 import LearnMoreHeader from "./components/react/LearnMoreHeader";
 

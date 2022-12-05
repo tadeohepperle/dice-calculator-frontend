@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { DiceIndex } from "../../logic/data_types";
 import ExamplesSidebarEntry from "./ExamplesSidebarEntry";
+import { Icons } from "./ui";
 
 let examples: {
   items: Partial<Record<DiceIndex, string>>;
@@ -30,8 +32,8 @@ let examples: {
     subtitle: "Approximation of normal distribution",
   },
   {
-    items: { 1: "d10/d5" },
-    subtitle: "Division of dice",
+    items: { 1: "d10/d5" /*2: "max(d20,d20)/d6"*/ },
+    subtitle: "Division of dice. Values always rounded to next integer.",
   },
 
   {
@@ -49,16 +51,19 @@ let examples: {
       "A bimodal distribution and a unimodal distribution with the same mean",
   },
   {
-    items: { 0: "10x(max(min(12,d20),9))" },
+    items: { 0: "10x(max(min(12,\nd20),9))" },
     subtitle: "Spiky distribution, looks like a hedgehog",
   },
   {
-    items: { 1: "10x(max(min(56,d100),45))+d5" },
+    items: { 1: "10x(max(min(56,\nd100),45))+d5" },
     subtitle: "Jedi Temple",
   },
-
   {
-    items: { 2: "d30xd30" },
+    items: { 2: "abs(2d20-2d20)" },
+    subtitle: "Using the absolute value of a distribution.",
+  },
+  {
+    items: { 0: "d30xd30" },
     subtitle:
       "About the limit of computations. This takes about 30 seconds to compute.",
   },
@@ -69,13 +74,48 @@ let examples: {
 ];
 
 const ExamplesSideBar = () => {
+  let [open, setOpen] = useState(false);
   return (
-    <div className="output-shadow bg-slate-800 rounded-tr-2xl rounded-br-2xl p-3 pb-5 pr-5 thick-shadow mr-5">
-      <h2 className="text-2xl leading-none font-bold text-white">Examples</h2>
-      <div className="hidden md:block">
+    <div
+      className="output-shadow bg-slate-800 
+    rounded-tr-2xl rounded-br-2xl 
+    thick-shadow mr-5"
+    >
+      <div
+        className={`pl-3 p-3 pr-5 rounded-tr-2xl 
+        cursor-pointer md:cursor-default flex 
+        justify-between items-center ${!open ? "rounded-br-2xl" : ""}`}
+        onClick={() => {
+          setOpen(!open);
+        }}
+      >
+        <h2 className="text-2xl leading-none font-bold text-white">Examples</h2>
+        <div className="self-right md:hidden">
+          <svg
+            height="20px"
+            width="20px"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox={Icons.arrow.viewBox}
+            style={{
+              transition: "all 170ms ease-in-out",
+              transform: open ? "rotate(0deg)" : "rotate(180deg)",
+            }}
+          >
+            <path className={"fill-white"} d={Icons.arrow.d} />
+          </svg>
+        </div>
+      </div>
+
+      <div
+        className={`pl-3 pr-5 max-h-full sidebar`}
+        style={{
+          maxHeight: open ? "3000px" : "0px",
+        }}
+      >
         {examples.map((e, i) => (
           <ExamplesSidebarEntry key={i} subtitle={e.subtitle} items={e.items} />
         ))}
+        <div className="mt-5"></div>
       </div>
     </div>
   );
