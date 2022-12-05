@@ -29,6 +29,10 @@ let examples: {
     items: { 2: "10d20" },
     subtitle: "Approximation of normal distribution",
   },
+  {
+    items: { 1: "d10/d5" },
+    subtitle: "Division of dice",
+  },
 
   {
     items: { 0: "d2xd6", 1: "d6xd2", 2: "d4xd3" },
@@ -52,6 +56,7 @@ let examples: {
     items: { 1: "10x(max(min(56,d100),45))+d5" },
     subtitle: "Jedi Temple",
   },
+
   {
     items: { 2: "d30xd30" },
     subtitle:
