@@ -6,6 +6,8 @@ Hosted at: https://tadeohepperle.com/dice-calculator-frontend/
 <img width="538" alt="image" src="https://user-images.githubusercontent.com/62739623/205859851-edbf3cf7-6064-45ba-91e2-0328c0d8e374.png">
 <img width="281" alt="image" src="https://user-images.githubusercontent.com/62739623/205859941-44d2ffc3-fd3e-4b2f-b257-5c117e5d3ca6.png">
 
+<img width="687" alt="image" src="https://user-images.githubusercontent.com/62739623/205860151-826f2979-098e-4f9f-a481-11eea9e3b8fb.png">
+<img width="683" alt="image" src="https://user-images.githubusercontent.com/62739623/205860204-9ac738bf-e1a6-4094-be1d-70b77e368480.png">
 
 ## Technology:
 - uses Rust compiled to Web Assembly (see: https://github.com/tadeohepperle/dices)
@@ -17,6 +19,3 @@ Hosted at: https://tadeohepperle.com/dice-calculator-frontend/
 - roller
 - comparison of distributions in graph
 - quantiles
-
-## Examples:
-- coming soon
