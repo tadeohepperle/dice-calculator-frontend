@@ -63,7 +63,7 @@ export function initSettingsToInitialState(
           ? {
               diceIndex: 0,
               initialInput: initSettings?.[0] || INITIAL_DICE_0_INPUT,
-              calculationState: { type: "newinput" },
+              calculationState: { type: "calculating" },
               rollManyNumber: 100,
             }
           : undefined,
@@ -71,7 +71,7 @@ export function initSettingsToInitialState(
         ? {
             diceIndex: 1,
             initialInput: initSettings?.[1],
-            calculationState: { type: "newinput" },
+            calculationState: { type: "calculating" },
             rollManyNumber: 100,
           }
         : undefined,
@@ -79,7 +79,7 @@ export function initSettingsToInitialState(
         ? {
             diceIndex: 2,
             initialInput: initSettings?.[2],
-            calculationState: { type: "newinput" },
+            calculationState: { type: "calculating" },
             rollManyNumber: 100,
           }
         : undefined,

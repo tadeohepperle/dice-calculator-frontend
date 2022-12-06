@@ -1,5 +1,5 @@
 import type { Action, StateFromReducersMapObject } from "@reduxjs/toolkit";
-import type { DiceIndex } from "../data_types";
+import type { DiceIndex, InitSettings } from "../data_types";
 import type { RootState } from "./reducer";
 
 export interface AbstractAppStateAction<T> extends Action<string> {
@@ -14,6 +14,7 @@ export namespace Actions {
   // ALL AVAILABLE ACTIONS
   ////////////////////////////////////////////////////////////////////////////////
   export type AppStateAction =
+    | Reset
     | DeleteDice
     | AddDice
     | CalculateDistribution
@@ -60,15 +61,21 @@ export namespace Actions {
 
   // ////////////////////////////////////////////////////////////////////////////////
 
+  export type ResetPayload = Partial<InitSettings>;
+  export interface Reset extends AbstractAppStateAction<ResetPayload> {
+    type: "Reset";
+  }
+  export function reset(settings: ResetPayload): Reset {
+    return { type: "Reset", payload: settings };
+  }
+
   ////////////////////////////////////////////////////////////////////////////////
 
   export interface DeleteDicePayload {
     diceIndex: DiceIndex;
   }
   export interface DeleteDice
-    extends AbstractAppStateAction<{
-      diceIndex: DiceIndex;
-    }> {
+    extends AbstractAppStateAction<DeleteDicePayload> {
     type: "DeleteDice";
   }
   export function deleteDice(diceIndex: DiceIndex): DeleteDice {

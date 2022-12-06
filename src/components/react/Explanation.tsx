@@ -1,6 +1,6 @@
 const Explanation = () => {
   return (
-    <div className="textdiv">
+    <div className="textdiv p-1">
       <h2>Syntax for Specifying Dice</h2>
       You can combine the following symbols in order to create interesting
       distributions for games and statistical questions.
@@ -67,9 +67,9 @@ const Explanation = () => {
           these fractions can get.
         </li>
         <li>
-          <b>Operator Precedence</b> The operators in order by their precedence
-          (highest to lowest): <b>x</b>, *, /, +/-. You can use Brackets to
-          explicitly control the order of evaluation if you are not sure.
+          <b>Precedence</b> The operators in order by their precedence (highest
+          to lowest): x, *, /, +/-. You can use Brackets to explicitly control
+          the order of evaluation if you are not sure.
         </li>
       </ul>
       <h2>Performance Limitations and Background</h2>
@@ -84,6 +84,13 @@ const Explanation = () => {
       Rolling dice (even 1000 at once) is pretty cheap though even for very
       complex distributions and can be usually done in a couple of milliseconds
       in the webbrowsers worker thread that is using Web Assembly.
+      <h2>Rust and Web Assembly</h2>
+      This project uses the
+      <a href="https://crates.io/crates/dices">Rust Dices Library</a> that I
+      wrote with the goal in mind to make it compile to WebAssembly. The web-app
+      you see spins up a separate worker thread which interops with WebAssembly.
+      In this way the main thread is not blocked, even during heavy
+      computations.
     </div>
   );
 };

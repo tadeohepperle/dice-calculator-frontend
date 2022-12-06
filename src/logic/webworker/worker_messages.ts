@@ -11,12 +11,14 @@ import type { Actions } from "../redux/actions";
 
 export namespace WorkerMessages {
   export type WorkerMessage =
+    | ResetMessage
     | CalculateMessage
     | RollMessage
     | CalculateProbabilityMessage
     | CalculatePerccentileMessage
     | RemoveDiceMessage;
   export type WorkerResponse =
+    | ResetResponse
     | CalculateResponse
     | RollResponse
     | CalculateProbabilityResponse
@@ -69,6 +71,37 @@ export namespace WorkerMessages {
       chartData: PdfAndCdfDistributionChartData | "unchanged";
     },
     "Calculate"
+  >;
+
+  /// reset Dice:
+  export interface ResetMessage
+    extends AbstractWorkerMessage<{
+      diceInputs: Partial<Record<DiceIndex, string>>;
+      percentileQuery: number | undefined;
+      probabilityQuery: number | undefined;
+    }> {
+    type: "Reset";
+  }
+  export function resetMessage(
+    diceInputs: Partial<Record<DiceIndex, string>>,
+    percentileQuery: number | undefined,
+    probabilityQuery: number | undefined
+  ): ResetMessage {
+    return {
+      type: "Reset",
+      payload: {
+        diceInputs,
+        percentileQuery,
+        probabilityQuery,
+      },
+    };
+  }
+  export type ResetResponse = AbstractWorkerResponse<
+    {
+      dices: Partial<Record<DiceIndex, JsDiceMaterialized>>;
+      chartData: PdfAndCdfDistributionChartData | "unchanged";
+    },
+    "Reset"
   >;
 
   /// remove Dice:

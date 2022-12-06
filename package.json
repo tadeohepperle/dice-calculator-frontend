@@ -5,13 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node build_webworker.js && tsc && vite build",
+    "build": "node build_webworker.js && tsc && vite build && node postbuild.js",
     "preview": "vite preview",
     "wbuild": "node build_webworker.js"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.0",
     "dices": "file:../../rust/dices/pkg",
+    "fs-extra": "^11.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.5",

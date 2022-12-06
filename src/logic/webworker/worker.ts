@@ -57,6 +57,7 @@ let messageResponseFunctionMap: Record<
   Roll: (msg) => rollHandler((msg as WorkerMessages.RollMessage).payload),
   RemoveDice: (msg) =>
     removeDiceHandler((msg as WorkerMessages.RemoveDiceMessage).payload),
+  Reset: (msg) => resetHandler((msg as WorkerMessages.ResetMessage).payload),
 };
 
 onmessage = function (e) {
@@ -124,7 +125,7 @@ function calculateHandler(
 
   // construct the dice, potentially resource intensive and could take several seconds, for example for 3d2000
   const dice = JsDice.build_from_string(input);
-  console.log("wprker", dice.distribution);
+
   const materialized = materializeJsDice(
     dice,
     probabilityQuery,
@@ -233,6 +234,44 @@ function removeDiceHandler(
   return { type: "RemoveDice", payload: { chartData } };
 }
 
+function resetHandler(
+  payload: WorkerMessages.ResetMessage["payload"]
+): WorkerMessages.ResetResponse {
+  const { probabilityQuery, percentileQuery } = payload;
+
+  for (const i of ALL_DICE_INDICES) {
+    let input = payload.diceInputs[i];
+    if (input !== undefined) {
+      const dice = JsDice.build_from_string(input);
+      const materialized = materializeJsDice(
+        dice,
+        probabilityQuery,
+        percentileQuery,
+        input
+      );
+      diceCache[i] = [input, dice, materialized];
+      diceInputSegmentsShown[i] = true;
+    } else {
+      diceCache[i] = undefined;
+      diceInputSegmentsShown[i] = false;
+    }
+  }
+
+  let chartData = calculateChartData()! as PdfAndCdfDistributionChartData;
+
+  return {
+    type: "Reset",
+    payload: {
+      dices: {
+        0: diceCache?.[0]?.[2] || undefined,
+        1: diceCache?.[1]?.[2] || undefined,
+        2: diceCache?.[2]?.[2] || undefined,
+      },
+      chartData,
+    },
+  };
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
@@ -265,15 +304,12 @@ function calculateChartData(): PdfAndCdfDistributionChartData | undefined {
   if (RELEVANT_DICE_INDICES.length == 0) {
     return undefined;
   }
-
-  console.log("dist", diceCache[0]?.[2].distribution);
   let min = Math.min(
     ...RELEVANT_DICE_INDICES.map((i) => {
       let val = diceCache[i]?.[2].distribution.values[0]?.[0];
       return val !== undefined ? val : Infinity;
     })
   );
-  console.log("min", min);
 
   let max = Math.max(
     ...RELEVANT_DICE_INDICES.map((i) => {
@@ -281,9 +317,6 @@ function calculateChartData(): PdfAndCdfDistributionChartData | undefined {
       return val !== undefined ? val : -Infinity;
     })
   );
-
-  console.log("max", max);
-
   let pdfAgg: Map<number, Map<DiceIndex, JsFractionMaterialized>> = new Map();
   let cdfAgg: Map<number, Map<DiceIndex, JsFractionMaterialized>> = new Map();
 
@@ -303,8 +336,6 @@ function calculateChartData(): PdfAndCdfDistributionChartData | undefined {
       const [val, pdf_frac] = diceCache[diceIndex]![2].distribution.values[i];
       const [_, cdf_frac] =
         diceCache[diceIndex]![2].cumulative_distribution.values[i];
-      // assert val === _
-      console.log("val", val);
       pdfAgg.get(val)!.set(diceIndex, pdf_frac);
       cdfAgg.get(val)!.set(diceIndex, cdf_frac);
     }

@@ -1,5 +1,8 @@
-import { useState } from "react";
-import { DiceIndex } from "../../logic/data_types";
+import { useState, useTransition } from "react";
+import { useDispatch } from "react-redux";
+import { ALL_DICE_INDICES, DiceIndex } from "../../logic/data_types";
+import { Actions } from "../../logic/redux/actions";
+import { getPartialInitSettingsFromURLParams } from "../../logic/utils";
 import ExamplesSidebarEntry from "./ExamplesSidebarEntry";
 import { Icons } from "./ui";
 
@@ -67,14 +70,11 @@ let examples: {
     subtitle:
       "About the limit of computations. This takes about 30 seconds to compute.",
   },
-  // {
-  //     items: ["___"],
-  //  subtitle: "____"
-  // },
 ];
 
 const ExamplesSideBar = () => {
   let [open, setOpen] = useState(false);
+  const dispatch = useDispatch();
   return (
     <div
       className="output-shadow bg-slate-800 
@@ -113,7 +113,33 @@ const ExamplesSideBar = () => {
         }}
       >
         {examples.map((e, i) => (
-          <ExamplesSidebarEntry key={i} subtitle={e.subtitle} items={e.items} />
+          <ExamplesSidebarEntry
+            key={i}
+            subtitle={e.subtitle}
+            items={e.items}
+            onClick={() => {
+              let hrefElements = [`?`];
+              ALL_DICE_INDICES.forEach((i) => {
+                if (e.items[i]) {
+                  hrefElements.push(
+                    `d${i + 1}=${encodeURIComponent(e.items[i]!)}`
+                  );
+                  hrefElements.push(`&`);
+                }
+              });
+              hrefElements.pop();
+              const href = hrefElements.join("");
+
+              window.history.pushState(href, "another page", href);
+
+              setOpen(false);
+              dispatch(
+                Actions.reset({
+                  ...e.items,
+                })
+              );
+            }}
+          />
         ))}
         <div className="mt-5"></div>
       </div>

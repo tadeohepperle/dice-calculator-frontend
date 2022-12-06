@@ -101,8 +101,25 @@ export async function wasmRemoveDice(
     WorkerMessages.RemoveDiceMessage,
     WorkerMessages.RemoveDiceResponse
   >(worker!, message);
-
   return payload.chartData;
+}
+
+export async function wasmResetAllDice(
+  diceInputs: Partial<Record<DiceIndex, string>>,
+  percentileQuery: number | undefined,
+  probabilityQuery: number | undefined
+): Promise<WorkerMessages.ResetResponse["payload"]> {
+  await ensureWorkerIsPresent();
+  const message = WorkerMessages.resetMessage(
+    diceInputs,
+    percentileQuery,
+    probabilityQuery
+  );
+  const { payload } = await postMessageAndAwaitResponse<
+    WorkerMessages.ResetMessage,
+    WorkerMessages.ResetResponse
+  >(worker!, message);
+  return payload;
 }
 
 export async function wasmRoll(rollPayload: RollPayload): Promise<RollResult> {

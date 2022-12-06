@@ -4,26 +4,21 @@ import { bgColors, diceIndexToUiColor, textColors } from "./ui";
 export interface Props {
   items: Partial<Record<DiceIndex, string>>;
   subtitle: string;
+  onClick: () => any;
 }
 
 const ExamplesSidebarEntry = (props: Props) => {
   const { items, subtitle } = props;
   const firstDiceIndex = ALL_DICE_INDICES.find((i) => items[i]) as DiceIndex;
   // construct href
-  let hrefElements = [`?`];
-  ALL_DICE_INDICES.forEach((i) => {
-    if (items[i]) {
-      hrefElements.push(`d${i + 1}=${encodeURIComponent(items[i]!)}`);
-      hrefElements.push(`&`);
-    }
-  });
-  hrefElements.pop();
-  const href = hrefElements.join("");
 
   // render
   return (
-    <a href={href} className="group">
-      <div className="flex mt-5 cursor-pointer transition-all hover:translate-x-2">
+    <div className="group">
+      <div
+        className="flex mt-5 cursor-pointer transition-all hover:translate-x-2"
+        onClick={props.onClick}
+      >
         <div
           className={`w-1 mr-2 ${bgColors[diceIndexToUiColor(firstDiceIndex)]}`}
           // {
@@ -53,7 +48,7 @@ const ExamplesSidebarEntry = (props: Props) => {
           </div>
         </div>
       </div>
-    </a>
+    </div>
   );
 };
 

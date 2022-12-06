@@ -1,3 +1,10 @@
+import {
+  ChartMode,
+  ComparatorMode,
+  InitSettings,
+  NumberMode,
+} from "./data_types";
+
 export function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -61,4 +68,31 @@ export function asOrUndefined<T>(value: any, allValues: T[]): T | undefined {
 export function orUndef<T, R>(func: (arg0: T) => R) {
   return (arg0: T | undefined | null) =>
     !arg0 && arg0 !== 0 ? undefined : func(arg0);
+}
+
+export function getPartialInitSettingsFromURLParams(
+  urlSearchParams: URLSearchParams
+): Partial<InitSettings> {
+  return {
+    [0]: orUndef(decodeURIComponent)(urlSearchParams.get("d1")),
+    [1]: orUndef(decodeURIComponent)(urlSearchParams.get("d2")),
+    [2]: orUndef(decodeURIComponent)(urlSearchParams.get("d3")),
+    cmpMode: asOrUndefined<ComparatorMode>(urlSearchParams.get("cmp"), [
+      "eq",
+      "lt",
+      "lte",
+      "gt",
+      "gte",
+    ]),
+    chartMode: asOrUndefined<ChartMode>(urlSearchParams.get("chart"), [
+      "cdf",
+      "pdf",
+    ]),
+    numberMode: asOrUndefined<NumberMode>(urlSearchParams.get("number"), [
+      "fraction",
+      "float",
+    ]),
+    perc: orUndef(parseFloat)(urlSearchParams.get("perc")),
+    prob: orUndef(parseFloat)(urlSearchParams.get("prob")),
+  };
 }
