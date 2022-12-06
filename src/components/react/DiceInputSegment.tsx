@@ -33,6 +33,9 @@ const DiceInputSegment = (props: Props) => {
   const [rollManyNumber, setRollManyNumber] = useState<number>(100);
   const [inputValue, setInputValue] = useState(props.initialInput || "");
   const [inputChanged, setInputChanged] = useState(false);
+  const [lastInitialInput, setLastInitialInput] = useState(
+    props.initialInput || ""
+  );
   const [rollResult, setRollResult] = useState<RollResult | undefined>(
     undefined
   );
@@ -40,11 +43,15 @@ const DiceInputSegment = (props: Props) => {
     running: false,
   });
 
-  const { inputSegmentCount } = useSelector((state: AppState) => {
+  const { inputSegmentCount, initialInput } = useSelector((state: AppState) => {
     let inputSegmentCount = numberOfInputSegments(state);
-
-    return { inputSegmentCount };
+    let initialInput = state.inputSegments[diceIndex]?.initialInput;
+    return { inputSegmentCount, initialInput };
   });
+  if (initialInput !== undefined && initialInput != lastInitialInput) {
+    setLastInitialInput(initialInput);
+    setInputValue(initialInput);
+  }
   const dispatch = useDispatch();
 
   const roll = async (type: "one" | "many") => {

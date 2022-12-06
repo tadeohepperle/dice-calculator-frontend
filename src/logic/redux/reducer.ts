@@ -267,6 +267,7 @@ function resetReducer(
   _: AppState,
   partialSettings: Actions.ResetPayload
 ): AppState {
+  console.log("reset", partialSettings);
   let settings = defaultInitSettings(partialSettings);
   kickoffInitialDistributionCalculation(settings!);
   return initSettingsToInitialState(settings);
@@ -303,6 +304,10 @@ async function kickoffInitialDistributionCalculation(
               ? {
                   ...state.inputSegments[0],
                   calculationState: { type: "done" },
+                  initialInput:
+                    initSettings[0] !== undefined
+                      ? initSettings[0]
+                      : state.inputSegments[0].initialInput,
                 }
               : undefined,
           1:
@@ -310,6 +315,10 @@ async function kickoffInitialDistributionCalculation(
               ? {
                   ...state.inputSegments[1],
                   calculationState: { type: "done" },
+                  initialInput:
+                    initSettings[1] !== undefined
+                      ? initSettings[1]
+                      : state.inputSegments[1].initialInput,
                 }
               : undefined,
           2:
@@ -317,6 +326,10 @@ async function kickoffInitialDistributionCalculation(
               ? {
                   ...state.inputSegments[2],
                   calculationState: { type: "done" },
+                  initialInput:
+                    initSettings[2] !== undefined
+                      ? initSettings[2]
+                      : state.inputSegments[2].initialInput,
                 }
               : undefined,
         },
